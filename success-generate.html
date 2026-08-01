@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Success</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&display=swap" rel="stylesheet" />
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: #F2F4F7;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .modal {
+      width: 380px;
+      background: #FFFFFF;
+      border-radius: 16px;
+      box-shadow:
+        0 0 0 1px rgba(0, 0, 0, 0.04),
+        0 20px 48px -8px rgba(0, 0, 0, 0.10),
+        0 8px 16px -6px rgba(0, 0, 0, 0.06);
+      animation: modalIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      overflow: hidden;
+    }
+
+    .accent-bar {
+      height: 3px;
+      background: linear-gradient(90deg, #12275C 33%, #D97757 66%, #00B886);
+    }
+
+    .modal__inner {
+      padding: 32px 28px 24px;
+      text-align: center;
+    }
+
+    /* ── large tick at top ── */
+    .icon-large {
+      width: 56px; height: 56px;
+      margin: 0 auto 16px;
+      border-radius: 50%;
+      background: #F0FDF6;
+      border: 2px solid #D1FAE0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      animation: ringPop 0.4s cubic-bezier(0.16, 1, 0.3, 1) 0.05s both;
+    }
+
+    .checkmark {
+      width: 28px; height: 28px;
+      stroke: #00B886;
+      stroke-width: 4;
+      fill: none;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      stroke-dasharray: 30;
+      stroke-dashoffset: 30;
+      animation: drawCheck 0.35s ease-out 0.2s forwards;
+    }
+
+    /* ── title ── */
+    .modal__title {
+      font-size: 18px;
+      font-weight: 700;
+      color: #12275C;
+      letter-spacing: -0.02em;
+      margin-bottom: 4px;
+      animation: fadeUp 0.35s ease-out 0.1s both;
+    }
+
+    .modal__sub {
+      font-size: 13px;
+      font-weight: 500;
+      color: #6B7280;
+      margin-bottom: 20px;
+      animation: fadeUp 0.35s ease-out 0.15s both;
+    }
+
+    .modal__sub strong {
+      color: #12275C;
+      font-weight: 600;
+    }
+
+    /* ── detail card ── */
+    .detail-card {
+      background: #F0F2F6;
+      border: 1.5px solid #D6DAE2;
+      border-radius: 10px;
+      padding: 12px 16px;
+      margin-bottom: 20px;
+      text-align: left;
+      animation: fadeUp 0.35s ease-out 0.2s both;
+    }
+
+    .detail-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 5px 0;
+    }
+
+    .detail-row + .detail-row {
+      border-top: 1px solid #E9ECF0;
+    }
+
+    .detail-label {
+      font-size: 12px;
+      font-weight: 500;
+      color: #6B7280;
+    }
+
+    .detail-value {
+      font-size: 13px;
+      font-weight: 600;
+      color: #12275C;
+      letter-spacing: -0.01em;
+    }
+
+    .detail-amount {
+      color: #D97757;
+      font-weight: 700;
+    }
+
+    .detail-invoice {
+      color: #12275C;
+      font-weight: 700;
+    }
+
+    /* ── status badge ── */
+    .badge-wrap {
+      display: flex;
+      justify-content: center;
+      margin-bottom: 20px;
+      animation: fadeUp 0.35s ease-out 0.18s both;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 4px 14px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 700;
+      background: #F0FDF6;
+      color: #0D7A4F;
+      border: 1px solid #D1FAE0;
+      color: #0D7A4F;
+      border: 1px solid #D1FAE0;
+    }
+
+    /* ── actions ── */
+    .actions {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      animation: fadeUp 0.35s ease-out 0.25s both;
+    }
+
+    .btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 10px 20px;
+      border-radius: 9px;
+      font-size: 13px;
+      font-weight: 600;
+      font-family: inherit;
+      border: none;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      text-decoration: none;
+    }
+
+    .btn--primary {
+      background: #12275C;
+      color: #FFFFFF;
+      box-shadow: 0 2px 8px rgba(10, 25, 41, 0.15);
+    }
+    .btn--primary:hover {
+      background: #132F4C;
+      box-shadow: 0 4px 14px rgba(10, 25, 41, 0.22);
+      transform: translateY(-1px);
+    }
+    .btn--primary:active {
+      transform: translateY(0);
+    }
+
+    .btn--ghost {
+      background: transparent;
+      color: #6B7280;
+      border: 1px solid #E0E3E7;
+    }
+    .btn--ghost:hover {
+      background: #F8F9FC;
+      color: #12275C;
+      border-color: #C5C9D0;
+    }
+
+    @keyframes modalIn {
+      from { opacity: 0; transform: scale(0.95) translateY(8px); }
+      to   { opacity: 1; transform: scale(1) translateY(0); }
+    }
+
+    @keyframes ringPop {
+      from { opacity: 0; transform: scale(0.5); }
+      to   { opacity: 1; transform: scale(1); }
+    }
+
+    @keyframes drawCheck {
+      to { stroke-dashoffset: 0; }
+    }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(4px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="modal" role="dialog" aria-modal="true">
+    <div class="accent-bar"></div>
+    <div class="modal__inner">
+
+      <div class="icon-large">
+        <svg class="checkmark" viewBox="0 0 24 24">
+          <path d="M5 13l4 4L19 7" />
+        </svg>
+      </div>
+
+      <h2 class="modal__title">Invoice Generated</h2>
+      <p class="modal__sub"><strong>INV-2026-0042</strong> &middot; SGD 12,450</p>
+
+      <div class="badge-wrap">
+        <span class="badge">
+          <svg width="11" height="11" viewBox="0 0 10 10" fill="none">
+            <circle cx="5" cy="5" r="4" stroke="currentColor" stroke-width="1.2"/>
+            <path d="M3 5l1.5 1.5L7 3.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
+          </svg>
+          Completed
+        </span>
+      </div>
+
+      <div class="detail-card">
+        <div class="detail-row">
+          <span class="detail-label">Payer</span>
+          <span class="detail-value">Mizuho Bank</span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-label">Invoice Date</span>
+          <span class="detail-value">28 June 2026</span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-label">Amount</span>
+          <span class="detail-value detail-amount">SGD 12,450.00</span>
+        </div>
+      </div>
+
+      <div class="actions">
+        <button class="btn btn--primary">
+          <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M8 3v10M3 8h10"/>
+          </svg>
+          Generate Another
+        </button>
+        <button class="btn btn--ghost">
+          View Invoice List
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+</body>
+</html>
