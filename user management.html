@@ -1,0 +1,1120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Users Management – Preview</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet" />
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --ink:       #0d1117;
+    --ink-2:     #24292f;
+    --ink-3:     #57606a;
+    --ink-4:     #8c959f;
+    --line:      #d0d7de;
+    --line-2:    #eaeef2;
+    --surface:   #ffffff;
+    --canvas:    #f6f8fa;
+    --canvas-2:  #eff1f3;
+    --blue:      #0969da;
+    --blue-bg:   #dbeafe;
+    --blue-dim:  #b3d1f7;
+    --indigo:    #1a3a8f;
+    --green:     #1a7f37;
+    --green-bg:  #d1fadf;
+    --red:       #cf222e;
+    --red-bg:    #ffebe9;
+    --amber:     #9a6700;
+    --amber-bg:  #fff8c5;
+    --purple:    #6639ba;
+    --purple-bg: #ede9ff;
+    --radius:    6px;
+    --radius-lg: 10px;
+    --shadow-sm: 0 1px 3px rgba(0,0,0,.07);
+    --shadow:    0 4px 12px rgba(0,0,0,.1);
+  }
+
+  body {
+    font-family: 'Inter', system-ui, sans-serif;
+    background: var(--canvas);
+    color: var(--ink);
+    font-size: 13px;
+    line-height: 1.5;
+    min-height: 100vh;
+  }
+
+  /* ── TOP NAV ── */
+  .topnav {
+    background: var(--indigo);
+    height: 48px;
+    display: flex;
+    align-items: center;
+    padding: 0 24px;
+    gap: 16px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    border-bottom: 1px solid rgba(255,255,255,.08);
+  }
+  .topnav-brand {
+    font-size: 13px;
+    font-weight: 700;
+    color: #fff;
+    letter-spacing: .02em;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .topnav-brand-dot {
+    width: 7px; height: 7px;
+    background: #60a5fa;
+    border-radius: 50%;
+  }
+  .topnav-sep { width: 1px; height: 18px; background: rgba(255,255,255,.15); }
+  .topnav-link {
+    font-size: 12px;
+    color: rgba(255,255,255,.6);
+    cursor: pointer;
+    transition: color .15s;
+    padding: 4px 8px;
+    border-radius: 4px;
+  }
+  .topnav-link:hover { color: #fff; background: rgba(255,255,255,.1); }
+  .topnav-link.active { color: #fff; background: rgba(255,255,255,.15); font-weight: 600; }
+  .topnav-spacer { flex: 1; }
+  .topnav-badge {
+    display: flex; align-items: center; gap: 6px;
+    background: rgba(255,255,255,.1);
+    border: 1px solid rgba(255,255,255,.15);
+    border-radius: 20px;
+    padding: 3px 10px;
+    font-size: 11px;
+    color: rgba(255,255,255,.8);
+    font-weight: 500;
+  }
+  .topnav-badge b { color: #fff; }
+
+  /* ── LAYOUT ── */
+  .page { max-width: 1280px; margin: 0 auto; padding: 24px 24px 48px; }
+
+  /* ── PAGE HEADER ── */
+  .page-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    margin-bottom: 20px;
+    gap: 12px;
+  }
+  .page-title { font-size: 18px; font-weight: 800; color: var(--ink); letter-spacing: -.02em; }
+  .page-sub { font-size: 12px; color: var(--ink-3); margin-top: 2px; }
+  .page-header-actions { display: flex; align-items: center; gap: 8px; }
+
+  /* ── BUTTONS ── */
+  .btn {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 6px 14px;
+    border-radius: var(--radius);
+    font-size: 12px; font-weight: 600;
+    cursor: pointer; border: none; transition: all .15s;
+    white-space: nowrap;
+  }
+  .btn-primary { background: var(--blue); color: #fff; }
+  .btn-primary:hover { background: #0860c8; }
+  .btn-ghost { background: var(--surface); color: var(--ink-2); border: 1px solid var(--line); }
+  .btn-ghost:hover { background: var(--canvas); }
+  .btn-danger { background: var(--red); color: #fff; }
+  .btn-danger:hover { background: #b91c1c; }
+  .btn-success { background: var(--green); color: #fff; }
+  .btn-success:hover { background: #15803d; }
+  .btn-amber { background: #d97706; color: #fff; }
+  .btn-amber:hover { background: #b45309; }
+  .btn-sm { padding: 4px 10px; font-size: 11px; }
+  .btn-icon { padding: 6px; border-radius: var(--radius); border: 1px solid var(--line); background: var(--surface); color: var(--ink-3); cursor: pointer; display: inline-flex; align-items: center; }
+  .btn-icon:hover { background: var(--canvas); color: var(--ink); }
+  .btn-icon svg { width: 14px; height: 14px; }
+
+  /* ── STAT STRIP ── */
+  .stat-strip {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    margin-bottom: 20px;
+    box-shadow: var(--shadow-sm);
+  }
+  .stat-cell {
+    padding: 16px 20px;
+    border-right: 1px solid var(--line-2);
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    transition: background .15s;
+  }
+  .stat-cell:last-child { border-right: none; }
+  .stat-cell:hover { background: var(--canvas); }
+  .stat-icon {
+    width: 36px; height: 36px;
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+  .stat-icon svg { width: 17px; height: 17px; }
+  .stat-icon.blue { background: var(--blue-bg); color: var(--blue); }
+  .stat-icon.green { background: var(--green-bg); color: var(--green); }
+  .stat-icon.red { background: var(--red-bg); color: var(--red); }
+  .stat-icon.purple { background: var(--purple-bg); color: var(--purple); }
+  .stat-num { font-size: 24px; font-weight: 800; letter-spacing: -.03em; line-height: 1; font-family: 'JetBrains Mono', monospace; }
+  .stat-label { font-size: 11px; font-weight: 600; color: var(--ink-3); text-transform: uppercase; letter-spacing: .05em; margin-top: 2px; }
+  .stat-num.blue { color: var(--blue); }
+  .stat-num.green { color: var(--green); }
+  .stat-num.red { color: var(--red); }
+  .stat-num.purple { color: var(--purple); }
+
+  /* ── CARDS ── */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    box-shadow: var(--shadow-sm);
+  }
+  .card-header {
+    display: flex; align-items: center; gap: 10px;
+    padding: 12px 18px;
+    border-bottom: 1px solid var(--line-2);
+    background: var(--canvas);
+  }
+  .card-header-icon {
+    width: 26px; height: 26px;
+    background: var(--blue-bg);
+    border-radius: 6px;
+    display: flex; align-items: center; justify-content: center;
+    color: var(--blue);
+  }
+  .card-header-icon svg { width: 13px; height: 13px; }
+  .card-title { font-size: 12px; font-weight: 700; color: var(--ink); }
+  .card-subtitle { font-size: 11px; color: var(--ink-3); margin-left: auto; }
+  .card-body { padding: 18px; }
+
+  /* ── MAIN GRID ── */
+  .main-grid {
+    display: grid;
+    grid-template-columns: 360px 1fr;
+    gap: 16px;
+    align-items: start;
+  }
+  .left-col { display: flex; flex-direction: column; gap: 16px; }
+  .right-col { display: flex; flex-direction: column; gap: 16px; }
+
+  /* ── FORM ── */
+  .field { display: flex; flex-direction: column; gap: 5px; margin-bottom: 12px; }
+  .field:last-child { margin-bottom: 0; }
+  .field-label { font-size: 11px; font-weight: 600; color: var(--ink-2); }
+  .field-label .req { color: var(--red); margin-left: 2px; }
+  .field-input {
+    height: 32px;
+    padding: 0 10px;
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    font-size: 12px;
+    font-family: inherit;
+    color: var(--ink);
+    background: var(--surface);
+    outline: none;
+    transition: border-color .15s, box-shadow .15s;
+    width: 100%;
+  }
+  .field-input:focus { border-color: var(--blue); box-shadow: 0 0 0 3px rgba(9,105,218,.12); }
+  .field-input.error { border-color: var(--red); background: #fff5f5; }
+  .field-hint { font-size: 11px; color: var(--ink-4); }
+  .field-err { font-size: 11px; color: var(--red); display: flex; align-items: center; gap: 4px; }
+  .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  select.field-input { appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%238c959f' stroke-width='2.5'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 10px center; padding-right: 30px; cursor: pointer; }
+  .form-actions { display: flex; align-items: center; gap: 8px; padding-top: 14px; border-top: 1px solid var(--line-2); margin-top: 14px; }
+  .notice {
+    background: var(--amber-bg);
+    border: 1px solid #e9c46a;
+    border-radius: var(--radius);
+    padding: 8px 12px;
+    font-size: 11px;
+    color: var(--amber);
+    display: flex;
+    align-items: flex-start;
+    gap: 6px;
+    margin-top: 12px;
+  }
+  .notice svg { width: 13px; height: 13px; flex-shrink: 0; margin-top: 1px; }
+
+  /* ── PILLS / BADGES ── */
+  .badge {
+    display: inline-flex; align-items: center; gap: 4px;
+    padding: 2px 8px;
+    border-radius: 20px;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: .03em;
+    border: 1px solid transparent;
+  }
+  .badge.admin   { background: var(--purple-bg); color: var(--purple); border-color: #d4c5f9; }
+  .badge.manager { background: var(--blue-bg);   color: var(--blue);   border-color: var(--blue-dim); }
+  .badge.user    { background: var(--canvas-2);  color: var(--ink-3);  border-color: var(--line); }
+  .badge.maker   { background: #fef3c7;           color: #92400e;       border-color: #fde68a; }
+  .badge.checker { background: #d1fae5;           color: #065f46;       border-color: #6ee7b7; }
+  .badge.leadership { background: var(--purple-bg); color: var(--purple); border-color: #d4c5f9; }
+  .status-dot { width: 6px; height: 6px; border-radius: 50%; }
+  .status-dot.active   { background: #22c55e; }
+  .status-dot.disabled { background: var(--red); }
+  .status-pill {
+    display: inline-flex; align-items: center; gap: 5px;
+    font-size: 10px; font-weight: 600;
+    padding: 2px 7px; border-radius: 20px; border: 1px solid transparent;
+  }
+  .status-pill.active   { background: var(--green-bg); color: var(--green); border-color: #86efac; }
+  .status-pill.disabled { background: var(--red-bg);   color: var(--red);   border-color: #fca5a5; }
+
+  /* ── SEARCH / FILTERS ── */
+  .search-row { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; }
+  .search-wrap { position: relative; flex: 1; }
+  .search-wrap svg { position: absolute; left: 9px; top: 50%; transform: translateY(-50%); width: 13px; height: 13px; color: var(--ink-4); }
+  .search-input {
+    height: 32px;
+    padding: 0 10px 0 30px;
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    font-size: 12px;
+    font-family: inherit;
+    width: 100%;
+    outline: none;
+    background: var(--surface);
+    color: var(--ink);
+    transition: border-color .15s, box-shadow .15s;
+  }
+  .search-input:focus { border-color: var(--blue); box-shadow: 0 0 0 3px rgba(9,105,218,.12); }
+  .filter-select {
+    height: 32px;
+    padding: 0 28px 0 10px;
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    font-size: 12px;
+    font-family: inherit;
+    background: var(--surface) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%238c959f' stroke-width='2.5'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E") no-repeat right 8px center;
+    appearance: none;
+    outline: none;
+    cursor: pointer;
+    color: var(--ink);
+  }
+  .filter-select:focus { border-color: var(--blue); }
+
+  /* ── USER LIST ── */
+  .user-list { display: flex; flex-direction: column; gap: 0; }
+  .user-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--line-2);
+    transition: background .12s;
+    cursor: default;
+  }
+  .user-row:last-child { border-bottom: none; }
+  .user-row:hover { background: var(--canvas); }
+  .avatar {
+    width: 32px; height: 32px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #0969da, #1a3a8f);
+    display: flex; align-items: center; justify-content: center;
+    color: #fff;
+    font-size: 11px;
+    font-weight: 700;
+    flex-shrink: 0;
+  }
+  .avatar.sm { width: 24px; height: 24px; font-size: 9px; }
+  .user-info { flex: 1; min-width: 0; }
+  .user-name { font-size: 12px; font-weight: 700; color: var(--ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: flex; align-items: center; gap: 6px; }
+  .user-email { font-size: 11px; color: var(--ink-3); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .you-tag { font-size: 9px; font-weight: 800; background: var(--blue); color: #fff; padding: 1px 5px; border-radius: 3px; }
+  .user-meta { display: flex; align-items: center; gap: 5px; flex-shrink: 0; }
+  .user-actions { display: flex; align-items: center; gap: 4px; flex-shrink: 0; }
+  .action-btn {
+    width: 28px; height: 28px;
+    border-radius: 5px;
+    border: 1px solid var(--line);
+    background: var(--surface);
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer;
+    color: var(--ink-3);
+    transition: all .15s;
+  }
+  .action-btn svg { width: 13px; height: 13px; }
+  .action-btn:hover.assign  { background: var(--blue-bg); border-color: var(--blue-dim); color: var(--blue); }
+  .action-btn:hover.key     { background: var(--amber-bg); border-color: #fde68a; color: var(--amber); }
+  .action-btn:hover.remove  { background: #fff7ed; border-color: #fed7aa; color: #c2410c; }
+  .action-btn:hover.disable { background: var(--red-bg); border-color: #fca5a5; color: var(--red); }
+  .action-btn:hover.enable  { background: var(--green-bg); border-color: #86efac; color: var(--green); }
+  .locked-tag {
+    display: flex; align-items: center; gap: 4px;
+    font-size: 10px; font-weight: 700;
+    color: var(--purple);
+    background: var(--purple-bg);
+    border: 1px solid #d4c5f9;
+    border-radius: 4px;
+    padding: 2px 7px;
+  }
+  .locked-tag svg { width: 11px; height: 11px; }
+
+  /* ── GROUP ACCORDION ── */
+  .group-list { display: flex; flex-direction: column; gap: 6px; }
+  .group-item { border: 1px solid var(--line); border-radius: var(--radius); overflow: hidden; }
+  .group-trigger {
+    width: 100%;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 9px 12px;
+    background: var(--canvas);
+    border: none; cursor: pointer; text-align: left;
+    transition: background .15s;
+  }
+  .group-trigger:hover { background: var(--canvas-2); }
+  .group-trigger-left { display: flex; align-items: center; gap: 8px; }
+  .group-trigger-name { font-size: 12px; font-weight: 700; color: var(--ink); }
+  .group-trigger-count { font-size: 11px; color: var(--ink-4); }
+  .group-body { padding: 10px 12px; border-top: 1px solid var(--line-2); display: flex; flex-direction: column; gap: 6px; }
+  .group-member { display: flex; align-items: center; gap: 8px; }
+  .group-member-name { font-size: 11px; font-weight: 600; color: var(--ink-2); }
+  .group-member-email { font-size: 11px; color: var(--ink-4); margin-left: auto; }
+
+  /* ── ROLE MANAGEMENT TABS ── */
+  .tab-bar { display: flex; gap: 2px; padding: 12px 18px 0; background: var(--canvas); border-bottom: 1px solid var(--line-2); }
+  .tab {
+    padding: 7px 14px;
+    font-size: 12px; font-weight: 600;
+    color: var(--ink-3);
+    cursor: pointer;
+    border: none; background: none;
+    border-bottom: 2px solid transparent;
+    margin-bottom: -1px;
+    transition: all .15s;
+    display: flex; align-items: center; gap: 6px;
+  }
+  .tab:hover { color: var(--ink); }
+  .tab.active { color: var(--blue); border-bottom-color: var(--blue); }
+  .tab-badge {
+    background: #d97706;
+    color: #fff;
+    font-size: 9px; font-weight: 800;
+    padding: 1px 5px;
+    border-radius: 10px;
+  }
+  .tab-body { padding: 16px 18px; }
+
+  /* ── INLINE ASSIGN ── */
+  .inline-assign {
+    display: flex; align-items: center; gap: 6px;
+    padding: 8px 14px;
+    background: #f0f6ff;
+    border-top: 1px solid var(--blue-dim);
+    animation: slideIn .15s ease;
+  }
+  @keyframes slideIn { from { opacity:0; transform: translateY(-4px); } to { opacity:1; transform: translateY(0); } }
+  .inline-assign .search-input { height: 28px; font-size: 11px; }
+  .inline-label { font-size: 11px; color: var(--ink-3); font-weight: 600; white-space: nowrap; }
+
+  /* ── DIVIDER ── */
+  .divider { border: none; border-top: 1px solid var(--line-2); margin: 14px 0; }
+
+  /* ── COUNT CHIP ── */
+  .count-chip { font-size: 11px; font-weight: 700; color: var(--ink-3); background: var(--canvas-2); border: 1px solid var(--line); border-radius: 4px; padding: 1px 7px; font-family: 'JetBrains Mono', monospace; }
+
+  /* ── EMPTY STATE ── */
+  .empty {
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    padding: 36px 16px; text-align: center; gap: 8px;
+  }
+  .empty-icon { width: 40px; height: 40px; background: var(--canvas-2); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: var(--ink-4); }
+  .empty-icon svg { width: 18px; height: 18px; }
+  .empty-title { font-size: 12px; font-weight: 700; color: var(--ink-2); }
+  .empty-desc  { font-size: 11px; color: var(--ink-4); max-width: 220px; }
+
+  /* ── USER COUNT ROW ── */
+  .list-meta { display: flex; align-items: center; justify-content: space-between; padding: 0 0 10px; }
+  .list-meta-text { font-size: 11px; color: var(--ink-4); }
+
+  /* ── SECTION LABEL ── */
+  .section-label {
+    font-size: 10px; font-weight: 700; text-transform: uppercase;
+    letter-spacing: .07em; color: var(--ink-4);
+    margin-bottom: 10px;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .section-label::after { content:''; flex:1; height:1px; background: var(--line-2); }
+
+  /* ── SCROLLABLE ── */
+  .scroll-box { max-height: 240px; overflow-y: auto; border: 1px solid var(--line); border-radius: var(--radius); }
+  .scroll-box::-webkit-scrollbar { width: 5px; }
+  .scroll-box::-webkit-scrollbar-track { background: transparent; }
+  .scroll-box::-webkit-scrollbar-thumb { background: var(--line); border-radius: 4px; }
+  .select-all-row {
+    display: flex; align-items: center; gap: 8px;
+    padding: 7px 12px;
+    background: var(--canvas);
+    border-bottom: 1px solid var(--line-2);
+    position: sticky; top: 0; z-index: 1;
+    font-size: 11px; font-weight: 600; color: var(--ink-3);
+  }
+  .select-count { margin-left: auto; font-size: 11px; font-weight: 700; color: var(--blue); }
+  input[type=checkbox] { accent-color: var(--blue); width: 13px; height: 13px; cursor: pointer; flex-shrink: 0; }
+
+  /* ── PULSE LIVE ── */
+  .live-indicator { display: flex; align-items: center; gap: 6px; }
+  .live-dot { width: 6px; height: 6px; border-radius: 50%; background: #22c55e; animation: blink 1.8s ease-in-out infinite; }
+  @keyframes blink { 0%,100% { opacity:1; } 50% { opacity:.2; } }
+  .live-text { font-size: 10px; font-weight: 600; color: var(--ink-4); font-family: 'JetBrains Mono', monospace; }
+
+  /* ── SIGNED-IN BAR ── */
+  .signed-in-bar {
+    display: flex; align-items: center; justify-content: space-between;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    padding: 8px 14px;
+    margin-bottom: 16px;
+    box-shadow: var(--shadow-sm);
+  }
+  .signed-in-text { font-size: 11px; color: var(--ink-3); }
+  .signed-in-text b { color: var(--ink); font-weight: 700; }
+  .signed-in-right { display: flex; align-items: center; gap: 8px; }
+
+  /* UTILITY */
+  .flex { display: flex; }
+  .items-center { align-items: center; }
+  .gap-2 { gap: 8px; }
+  .gap-1 { gap: 4px; }
+  .flex-1 { flex: 1; }
+  .ml-auto { margin-left: auto; }
+  .text-mono { font-family: 'JetBrains Mono', monospace; }
+  .mt-2 { margin-top: 8px; }
+  .mt-3 { margin-top: 12px; }
+</style>
+</head>
+<body>
+
+<!-- TOP NAV -->
+<nav class="topnav">
+  <div class="topnav-brand">
+    <div class="topnav-brand-dot"></div>
+    LG Talent Hub
+  </div>
+  <div class="topnav-sep"></div>
+  <span class="topnav-link">Candidates</span>
+  <span class="topnav-link active">Users</span>
+  <span class="topnav-link">Roles</span>
+  <span class="topnav-link">Settings</span>
+  <div class="topnav-spacer"></div>
+  <div class="live-indicator">
+    <div class="live-dot"></div>
+    <span class="live-text">LIVE</span>
+  </div>
+  <div class="topnav-sep"></div>
+  <div class="topnav-badge">
+    <span>Signed in as</span>
+    <b>admin@lg.com</b>
+    <span style="color:rgba(255,255,255,.4)">(ADMIN)</span>
+  </div>
+</nav>
+
+<!-- PAGE -->
+<div class="page">
+
+  <!-- PAGE HEADER -->
+  <div class="page-header">
+    <div>
+      <div class="page-title">User Management</div>
+      <div class="page-sub">Manage Cognito user pool accounts, groups, and role assignments</div>
+    </div>
+    <div class="page-header-actions">
+      <div class="live-indicator">
+        <div class="live-dot"></div>
+        <span class="live-text">19 Jun 2026 · 14:32 SGT</span>
+      </div>
+      <button class="btn-icon" title="Refresh">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+      </button>
+    </div>
+  </div>
+
+  <!-- SIGNED IN BAR -->
+  <div class="signed-in-bar">
+    <span class="signed-in-text">Signed in as <b>admin@lg.com</b> <span style="color:var(--ink-4)">(ADMIN)</span></span>
+    <div class="signed-in-right">
+      <span class="count-chip">9 total users</span>
+      <button class="btn-icon" title="Refresh">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+      </button>
+    </div>
+  </div>
+
+  <!-- STAT STRIP -->
+  <div class="stat-strip">
+    <div class="stat-cell">
+      <div class="stat-icon blue">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+      </div>
+      <div>
+        <div class="stat-num blue">9</div>
+        <div class="stat-label">Total Users</div>
+      </div>
+    </div>
+    <div class="stat-cell">
+      <div class="stat-icon green">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><polyline points="16 11 18 13 22 9"/></svg>
+      </div>
+      <div>
+        <div class="stat-num green">7</div>
+        <div class="stat-label">Active Accounts</div>
+      </div>
+    </div>
+    <div class="stat-cell">
+      <div class="stat-icon red">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="17" y1="11" x2="23" y2="17"/><line x1="23" y1="11" x2="17" y2="17"/></svg>
+      </div>
+      <div>
+        <div class="stat-num red">2</div>
+        <div class="stat-label">Suspended</div>
+      </div>
+    </div>
+    <div class="stat-cell">
+      <div class="stat-icon purple">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+      </div>
+      <div>
+        <div class="stat-num purple">2</div>
+        <div class="stat-label">Admin Users</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MAIN GRID -->
+  <div class="main-grid">
+
+    <!-- LEFT COL -->
+    <div class="left-col">
+
+      <!-- ADD USER FORM -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-header-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/><line x1="19" y1="8" x2="19" y2="14"/><line x1="22" y1="11" x2="16" y2="11"/></svg>
+          </div>
+          <span class="card-title">Add New User</span>
+        </div>
+        <div class="card-body">
+          <div class="field">
+            <label class="field-label">Full Name <span class="req">*</span></label>
+            <input class="field-input" type="text" placeholder="e.g. John Doe" value="Sarah Chen" />
+          </div>
+          <div class="field">
+            <label class="field-label">Email Address <span class="req">*</span></label>
+            <input class="field-input" type="email" placeholder="john.doe@company.com" value="sarah.chen@lg.com" />
+          </div>
+          <div class="field-row">
+            <div class="field">
+              <label class="field-label">Temp Password <span class="req">*</span></label>
+              <input class="field-input" type="password" placeholder="Min 8 chars" value="MyPass1!" />
+            </div>
+            <div class="field">
+              <label class="field-label">Confirm Password <span class="req">*</span></label>
+              <input class="field-input" type="password" placeholder="Re-enter" value="MyPass1!" />
+            </div>
+          </div>
+          <div class="field">
+            <label class="field-label">Assign to Group <span class="req">*</span></label>
+            <select class="field-input">
+              <option value="">Select group</option>
+              <option>ADMIN</option>
+              <option selected>MANAGER</option>
+              <option>USER</option>
+              <option>MAKER</option>
+              <option>CHECKER</option>
+            </select>
+          </div>
+          <div class="notice">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+            User receives a temp password and must change it on first login. Created directly in the Cognito User Pool.
+          </div>
+          <div class="form-actions">
+            <button class="btn btn-primary">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              Create User
+            </button>
+            <button class="btn btn-ghost">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+              Reset
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- GROUP MANAGEMENT -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-header-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/><line x1="12" y1="11" x2="12" y2="17"/><line x1="9" y1="14" x2="15" y2="14"/></svg>
+          </div>
+          <span class="card-title">Group Management</span>
+        </div>
+        <div class="card-body">
+          <div class="field">
+            <label class="field-label">New Group Name</label>
+            <input class="field-input" type="text" placeholder="e.g. DEVELOPER (no spaces)" />
+          </div>
+          <div class="field">
+            <label class="field-label">Description <span style="color:var(--ink-4);font-weight:500">(optional)</span></label>
+            <input class="field-input" type="text" placeholder="Short description of this group" />
+          </div>
+          <div class="form-actions" style="padding-top:10px;margin-top:10px">
+            <button class="btn btn-success">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              Create Group
+            </button>
+          </div>
+
+          <hr class="divider" />
+          <div class="section-label">Existing Groups</div>
+
+          <div class="group-list">
+            <!-- ADMIN group open -->
+            <div class="group-item">
+              <button class="group-trigger">
+                <div class="group-trigger-left">
+                  <span class="badge admin">ADMIN</span>
+                  <span class="group-trigger-name">ADMIN</span>
+                  <span class="group-trigger-count">2 members</span>
+                </div>
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m18 15-6-6-6 6"/></svg>
+              </button>
+              <div class="group-body">
+                <div class="group-member">
+                  <div class="avatar sm">A</div>
+                  <span class="group-member-name">Alice Tan</span>
+                  <span class="group-member-email">alice@lg.com</span>
+                </div>
+                <div class="group-member">
+                  <div class="avatar sm">B</div>
+                  <span class="group-member-name">Bob Lim</span>
+                  <span class="group-member-email">bob@lg.com</span>
+                </div>
+              </div>
+            </div>
+            <div class="group-item">
+              <button class="group-trigger">
+                <div class="group-trigger-left">
+                  <span class="badge manager">MANAGER</span>
+                  <span class="group-trigger-name">MANAGER</span>
+                  <span class="group-trigger-count">3 members</span>
+                </div>
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m6 9 6 6 6-6"/></svg>
+              </button>
+            </div>
+            <div class="group-item">
+              <button class="group-trigger">
+                <div class="group-trigger-left">
+                  <span class="badge user">USER</span>
+                  <span class="group-trigger-name">USER</span>
+                  <span class="group-trigger-count">2 members</span>
+                </div>
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m6 9 6 6 6-6"/></svg>
+              </button>
+            </div>
+            <div class="group-item">
+              <button class="group-trigger">
+                <div class="group-trigger-left">
+                  <span class="badge maker">MAKER</span>
+                  <span class="group-trigger-name">MAKER</span>
+                  <span class="group-trigger-count">1 member</span>
+                </div>
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m6 9 6 6 6-6"/></svg>
+              </button>
+            </div>
+            <div class="group-item">
+              <button class="group-trigger">
+                <div class="group-trigger-left">
+                  <span class="badge checker">CHECKER</span>
+                  <span class="group-trigger-name">CHECKER</span>
+                  <span class="group-trigger-count">1 member</span>
+                </div>
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m6 9 6 6 6-6"/></svg>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ROLE MANAGEMENT -->
+      <div class="card">
+        <div class="tab-bar">
+          <button class="tab active">Transfer</button>
+          <button class="tab">Unassigned <span class="tab-badge">2</span></button>
+          <button class="tab">Bulk Actions</button>
+        </div>
+        <div class="tab-body">
+          <p style="font-size:11px;color:var(--ink-3);margin-bottom:12px;">Pick a source group, select users, choose a destination — move in one click.</p>
+          <div class="field-row" style="margin-bottom:12px">
+            <div class="field" style="margin-bottom:0">
+              <label class="field-label">From Group</label>
+              <select class="field-input">
+                <option value="">Select source…</option>
+                <option selected>USER</option>
+                <option>MANAGER</option>
+                <option>ADMIN</option>
+              </select>
+            </div>
+            <div class="field" style="margin-bottom:0">
+              <label class="field-label">To Group</label>
+              <select class="field-input">
+                <option value="">Select destination…</option>
+                <option>ADMIN</option>
+                <option selected>MANAGER</option>
+                <option>CHECKER</option>
+              </select>
+            </div>
+          </div>
+          <div class="scroll-box" style="margin-bottom:12px">
+            <div class="select-all-row">
+              <input type="checkbox" />
+              <span>Select all (2)</span>
+              <span class="select-count">1 selected</span>
+            </div>
+            <div class="user-row" style="padding:8px 12px">
+              <input type="checkbox" checked />
+              <div class="avatar sm">C</div>
+              <div class="user-info">
+                <div class="user-name" style="font-size:11px">Carol Ng</div>
+                <div class="user-email">carol@lg.com</div>
+              </div>
+              <span class="status-pill active"><span class="status-dot active"></span>Active</span>
+            </div>
+            <div class="user-row" style="padding:8px 12px">
+              <input type="checkbox" />
+              <div class="avatar sm">D</div>
+              <div class="user-info">
+                <div class="user-name" style="font-size:11px">Dave Koh</div>
+                <div class="user-email">dave@lg.com</div>
+              </div>
+              <span class="status-pill disabled"><span class="status-dot disabled"></span>Off</span>
+            </div>
+          </div>
+          <button class="btn btn-primary" style="width:100%;justify-content:center">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><polyline points="16 11 18 13 22 9"/></svg>
+            Move 1 user → MANAGER
+          </button>
+        </div>
+      </div>
+
+    </div><!-- /left-col -->
+
+    <!-- RIGHT COL -->
+    <div class="right-col">
+      <div class="card">
+        <div class="card-header">
+          <div class="card-header-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+          </div>
+          <span class="card-title">All Cognito Users</span>
+          <span class="card-subtitle">
+            <span class="count-chip">9 users</span>
+          </span>
+        </div>
+        <div class="card-body">
+          <!-- Filters -->
+          <div class="search-row">
+            <div class="search-wrap flex-1">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+              <input class="search-input" placeholder="Search by name or email…" value="" />
+            </div>
+            <select class="filter-select">
+              <option>All Groups</option>
+              <option>ADMIN</option>
+              <option>MANAGER</option>
+              <option>USER</option>
+            </select>
+            <select class="filter-select">
+              <option>All Status</option>
+              <option>Enabled</option>
+              <option>Disabled</option>
+            </select>
+          </div>
+
+          <div class="list-meta">
+            <span class="list-meta-text">9 users shown</span>
+          </div>
+
+          <!-- USER LIST -->
+          <div class="user-list" style="border:1px solid var(--line);border-radius:var(--radius);overflow:hidden;">
+
+            <!-- User 1 — YOU -->
+            <div class="user-row">
+              <div class="avatar">A</div>
+              <div class="user-info">
+                <div class="user-name">
+                  Alice Tan
+                  <span class="you-tag">YOU</span>
+                  <span class="badge admin" style="font-size:9px">ADMIN</span>
+                  <span class="status-pill active" style="font-size:9px"><span class="status-dot active"></span>Active</span>
+                </div>
+                <div class="user-email">alice@lg.com · Joined 12 Jan 2025</div>
+              </div>
+            </div>
+
+            <!-- User 2 -->
+            <div class="user-row">
+              <div class="avatar" style="background:linear-gradient(135deg,#6639ba,#4c1d95)">B</div>
+              <div class="user-info">
+                <div class="user-name">
+                  Bob Lim
+                  <span class="badge admin" style="font-size:9px">ADMIN</span>
+                  <span class="status-pill active" style="font-size:9px"><span class="status-dot active"></span>Active</span>
+                </div>
+                <div class="user-email">bob@lg.com · Joined 15 Jan 2025</div>
+              </div>
+              <div class="user-actions">
+                <button class="action-btn assign" title="Assign group">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><polyline points="16 11 18 13 22 9"/></svg>
+                </button>
+                <button class="action-btn key" title="Reset password">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="7.5" cy="15.5" r="5.5"/><path d="m21 2-9.6 9.6"/><path d="m15.5 7.5 3 3L22 7l-3-3"/></svg>
+                </button>
+                <button class="action-btn remove" title="Remove from group">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="22" y1="11" x2="16" y2="11"/></svg>
+                </button>
+                <button class="action-btn disable" title="Disable user">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="17" y1="11" x2="23" y2="17"/><line x1="23" y1="11" x2="17" y2="17"/></svg>
+                </button>
+              </div>
+            </div>
+
+            <!-- User 3 — inline assign open -->
+            <div style="border-bottom:1px solid var(--line-2)">
+              <div class="user-row" style="border-bottom:none;background:#f0f6ff">
+                <div class="avatar" style="background:linear-gradient(135deg,#059669,#047857)">C</div>
+                <div class="user-info">
+                  <div class="user-name">
+                    Carol Ng
+                    <span class="badge manager" style="font-size:9px">MANAGER</span>
+                    <span class="status-pill active" style="font-size:9px"><span class="status-dot active"></span>Active</span>
+                  </div>
+                  <div class="user-email">carol@lg.com · Joined 20 Feb 2025</div>
+                </div>
+                <div class="user-actions">
+                  <button class="action-btn" style="background:var(--blue);border-color:var(--blue);color:#fff" title="Assign group (open)">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><polyline points="16 11 18 13 22 9"/></svg>
+                  </button>
+                  <button class="action-btn key" title="Reset password">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="7.5" cy="15.5" r="5.5"/><path d="m21 2-9.6 9.6"/><path d="m15.5 7.5 3 3L22 7l-3-3"/></svg>
+                  </button>
+                  <button class="action-btn remove" title="Remove from group">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="22" y1="11" x2="16" y2="11"/></svg>
+                  </button>
+                  <button class="action-btn disable" title="Disable user">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="17" y1="11" x2="23" y2="17"/><line x1="23" y1="11" x2="17" y2="17"/></svg>
+                  </button>
+                </div>
+              </div>
+              <!-- Inline assign row -->
+              <div class="inline-assign">
+                <span class="inline-label">Assign to:</span>
+                <select class="filter-select flex-1" style="height:28px;font-size:11px">
+                  <option value="">Select group…</option>
+                  <option>ADMIN</option>
+                  <option selected>MANAGER</option>
+                  <option>USER</option>
+                </select>
+                <button class="btn btn-primary btn-sm">
+                  <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                  Assign
+                </button>
+                <button class="btn btn-ghost btn-sm">Cancel</button>
+              </div>
+            </div>
+
+            <!-- User 4 — DISABLED -->
+            <div class="user-row" style="opacity:.75">
+              <div class="avatar" style="background:linear-gradient(135deg,#6b7280,#374151)">D</div>
+              <div class="user-info">
+                <div class="user-name">
+                  Dave Koh
+                  <span class="badge user" style="font-size:9px">USER</span>
+                  <span class="status-pill disabled" style="font-size:9px"><span class="status-dot disabled"></span>Disabled</span>
+                </div>
+                <div class="user-email">dave@lg.com · Joined 03 Mar 2025</div>
+              </div>
+              <div class="user-actions">
+                <button class="action-btn assign" title="Assign group">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><polyline points="16 11 18 13 22 9"/></svg>
+                </button>
+                <button class="action-btn key" title="Reset password">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="7.5" cy="15.5" r="5.5"/><path d="m21 2-9.6 9.6"/><path d="m15.5 7.5 3 3L22 7l-3-3"/></svg>
+                </button>
+                <button class="action-btn remove" title="Remove from group">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="22" y1="11" x2="16" y2="11"/></svg>
+                </button>
+                <button class="action-btn enable" title="Enable user">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><polyline points="16 11 18 13 22 9"/></svg>
+                </button>
+              </div>
+            </div>
+
+            <!-- User 5 — LEADERSHIP LOCKED -->
+            <div class="user-row">
+              <div class="avatar" style="background:linear-gradient(135deg,#6639ba,#9333ea)">E</div>
+              <div class="user-info">
+                <div class="user-name">
+                  Elena Yeo
+                  <span class="badge leadership" style="font-size:9px">LEADERSHIP</span>
+                  <span class="status-pill active" style="font-size:9px"><span class="status-dot active"></span>Active</span>
+                </div>
+                <div class="user-email">elena@lg.com · Joined 01 Jan 2025</div>
+              </div>
+              <div class="locked-tag">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                Leadership
+              </div>
+            </div>
+
+            <!-- User 6 -->
+            <div class="user-row">
+              <div class="avatar" style="background:linear-gradient(135deg,#d97706,#92400e)">F</div>
+              <div class="user-info">
+                <div class="user-name">
+                  Frank Wu
+                  <span class="badge maker" style="font-size:9px">MAKER</span>
+                  <span class="status-pill active" style="font-size:9px"><span class="status-dot active"></span>Active</span>
+                </div>
+                <div class="user-email">frank@lg.com · Joined 10 Apr 2025</div>
+              </div>
+              <div class="user-actions">
+                <button class="action-btn assign" title="Assign group">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><polyline points="16 11 18 13 22 9"/></svg>
+                </button>
+                <button class="action-btn key" title="Reset password">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="7.5" cy="15.5" r="5.5"/><path d="m21 2-9.6 9.6"/><path d="m15.5 7.5 3 3L22 7l-3-3"/></svg>
+                </button>
+                <button class="action-btn remove" title="Remove from group">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="22" y1="11" x2="16" y2="11"/></svg>
+                </button>
+                <button class="action-btn disable" title="Disable user">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="17" y1="11" x2="23" y2="17"/><line x1="23" y1="11" x2="17" y2="17"/></svg>
+                </button>
+              </div>
+            </div>
+
+            <!-- User 7 -->
+            <div class="user-row">
+              <div class="avatar" style="background:linear-gradient(135deg,#0891b2,#0e7490)">G</div>
+              <div class="user-info">
+                <div class="user-name">
+                  Grace Ho
+                  <span class="badge checker" style="font-size:9px">CHECKER</span>
+                  <span class="status-pill active" style="font-size:9px"><span class="status-dot active"></span>Active</span>
+                </div>
+                <div class="user-email">grace@lg.com · Joined 22 Apr 2025</div>
+              </div>
+              <div class="user-actions">
+                <button class="action-btn assign" title="Assign group">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><polyline points="16 11 18 13 22 9"/></svg>
+                </button>
+                <button class="action-btn key" title="Reset password">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="7.5" cy="15.5" r="5.5"/><path d="m21 2-9.6 9.6"/><path d="m15.5 7.5 3 3L22 7l-3-3"/></svg>
+                </button>
+                <button class="action-btn remove" title="Remove from group">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="22" y1="11" x2="16" y2="11"/></svg>
+                </button>
+                <button class="action-btn disable" title="Disable user">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="17" y1="11" x2="23" y2="17"/><line x1="23" y1="11" x2="17" y2="17"/></svg>
+                </button>
+              </div>
+            </div>
+
+            <!-- User 8 — DISABLED + password reset open -->
+            <div style="border-bottom:1px solid var(--line-2)">
+              <div class="user-row" style="border-bottom:none;background:#fffbeb">
+                <div class="avatar" style="background:linear-gradient(135deg,#6b7280,#374151)">H</div>
+                <div class="user-info">
+                  <div class="user-name">
+                    Henry Park
+                    <span class="badge manager" style="font-size:9px">MANAGER</span>
+                    <span class="status-pill disabled" style="font-size:9px"><span class="status-dot disabled"></span>Disabled</span>
+                  </div>
+                  <div class="user-email">henry@lg.com · Joined 05 May 2025</div>
+                </div>
+                <div class="user-actions">
+                  <button class="action-btn assign" title="Assign group">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><polyline points="16 11 18 13 22 9"/></svg>
+                  </button>
+                  <button class="action-btn" style="background:#d97706;border-color:#d97706;color:#fff" title="Reset password (open)">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="7.5" cy="15.5" r="5.5"/><path d="m21 2-9.6 9.6"/><path d="m15.5 7.5 3 3L22 7l-3-3"/></svg>
+                  </button>
+                  <button class="action-btn remove">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="22" y1="11" x2="16" y2="11"/></svg>
+                  </button>
+                  <button class="action-btn enable" title="Enable user">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><polyline points="16 11 18 13 22 9"/></svg>
+                  </button>
+                </div>
+              </div>
+              <!-- Password reset inline -->
+              <div style="padding:8px 14px 10px 56px;background:#fffbeb;border-top:1px solid #fde68a;display:flex;flex-direction:column;gap:6px;animation:slideIn .15s ease">
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+                  <input class="field-input" type="password" placeholder="New password" style="height:28px;font-size:11px;border-color:#fde68a" />
+                  <input class="field-input" type="password" placeholder="Confirm password" style="height:28px;font-size:11px;border-color:#fde68a" />
+                </div>
+                <div style="display:flex;align-items:center;gap:8px">
+                  <button class="btn btn-amber btn-sm">
+                    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="7.5" cy="15.5" r="5.5"/><path d="m21 2-9.6 9.6"/></svg>
+                    Reset Password
+                  </button>
+                  <button class="btn btn-ghost btn-sm">Cancel</button>
+                </div>
+              </div>
+            </div>
+
+            <!-- User 9 -->
+            <div class="user-row">
+              <div class="avatar" style="background:linear-gradient(135deg,#ec4899,#be185d)">I</div>
+              <div class="user-info">
+                <div class="user-name">
+                  Irene Soo
+                  <span class="badge user" style="font-size:9px">USER</span>
+                  <span class="status-pill active" style="font-size:9px"><span class="status-dot active"></span>Active</span>
+                </div>
+                <div class="user-email">irene@lg.com · Joined 18 Jun 2025</div>
+              </div>
+              <div class="user-actions">
+                <button class="action-btn assign" title="Assign group">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><polyline points="16 11 18 13 22 9"/></svg>
+                </button>
+                <button class="action-btn key" title="Reset password">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="7.5" cy="15.5" r="5.5"/><path d="m21 2-9.6 9.6"/><path d="m15.5 7.5 3 3L22 7l-3-3"/></svg>
+                </button>
+                <button class="action-btn remove" title="Remove from group">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="22" y1="11" x2="16" y2="11"/></svg>
+                </button>
+                <button class="action-btn disable" title="Disable user">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="17" y1="11" x2="23" y2="17"/><line x1="23" y1="11" x2="17" y2="17"/></svg>
+                </button>
+              </div>
+            </div>
+
+          </div><!-- /user-list -->
+        </div>
+      </div>
+    </div><!-- /right-col -->
+
+  </div><!-- /main-grid -->
+
+</div><!-- /page -->
+
+</body>
+</html>

@@ -1,0 +1,533 @@
+<!DOCTYPE html><html lang="en"><head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>All Negotiations</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,650;14..32,700;14..32,800&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg: #F4F6F9;
+  --surface: #FFFFFF;
+  --border: #DEE2E8;
+  --border-soft: #E8EBF0;
+  --text: #101318;
+  --text-2: #5B6370;
+  --text-3: #959DA8;
+  --blue: #1A56DB;
+  --blue-dark: #1243AF;
+  --blue-bg: #EBF1FE;
+  --blue-rgb: 26, 86, 219;
+  --green: #05905E;
+  --green-bg: #E4F7EF;
+  --red: #D92D3A;
+  --red-bg: #FDEBED;
+  --amber: #B8770A;
+  --amber-bg: #FEF6E6;
+  --teal: #0B8E82;
+  --teal-bg: #E8F8F6;
+  --purple: #6638C0;
+  --purple-bg: #F0EAFB;
+  --orange: #B85A0A;
+  --orange-bg: #FEF2E8;
+}
+body { background: var(--bg); min-height: 100vh; font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; -webkit-font-smoothing: antialiased; color: var(--text); }
+
+.topnav { height: 54px; background: #0F1217; display: flex; align-items: center; justify-content: space-between; padding: 0 36px; position: sticky; top: 0; z-index: 100; }
+.bc { color: rgba(255,255,255,0.4); font-size: 13px; font-weight: 500; }
+.bc.active { color: #fff; font-weight: 600; }
+.bc-sep { color: rgba(255,255,255,0.15); font-size: 15px; margin: 0 3px; }
+.topnav-r { display: flex; align-items: center; gap: 14px; }
+.topnav-av { width: 30px; height: 30px; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; color: #fff; background: var(--blue); }
+
+.page { padding: 36px 36px 64px; max-width: 1460px; margin: 0 auto; }
+
+.page-hdr { display: flex; align-items: center; gap: 16px; margin-bottom: 28px; }
+.page-hdr .icon { width: 44px; height: 44px; border-radius: 10px; display: flex; align-items: center; justify-content: center; background: var(--blue-bg); flex-shrink: 0; }
+.page-hdr .icon svg { stroke: var(--blue); stroke-width: 1.5; }
+.page-hdr .ht h1 { font-size: 21px; font-weight: 700; color: var(--text); display: flex; align-items: center; gap: 12px; }
+.page-hdr .ht h1 .badge { font-size: 11px; font-weight: 600; padding: 3px 12px; background: var(--blue-bg); color: var(--blue); letter-spacing: 0.02em; }
+.page-hdr .ht p { font-size: 13px; color: var(--text-2); margin-top: 2px; }
+
+.filter-card { background: var(--surface); border: 1px solid var(--border); margin-bottom: 22px; padding: 18px 24px; display: flex; flex-wrap: wrap; gap: 14px; align-items: flex-end; }
+.filter-item { display: flex; flex-direction: column; gap: 5px; }
+.filter-item label { font-size: 11px; font-weight: 600; color: var(--text-3); letter-spacing: 0.03em; }
+.filter-item input, .filter-item select { height: 38px; padding: 0 12px; border: 1px solid var(--border); font-size: 13px; color: var(--text); background: #fff; font-family: inherit; outline: none; transition: border .12s; min-width: 130px; }
+.filter-item input:focus, .filter-item select:focus { border-color: var(--blue); box-shadow: 0 0 0 3px rgba(var(--blue-rgb),0.08); }
+.btn-primary { height: 38px; display: inline-flex; align-items: center; gap: 7px; font-size: 13px; font-weight: 600; padding: 0 20px; background: var(--blue); color: #fff; border: none; cursor: pointer; transition: background .15s; font-family: inherit; }
+.btn-primary:hover { background: var(--blue-dark); }
+.btn-primary svg { stroke: currentColor; stroke-width: 2; }
+
+.quick-filters { display: flex; gap: 8px; margin-bottom: 18px; flex-wrap: wrap; }
+.qf-item { display: flex; align-items: center; gap: 8px; height: 34px; padding: 0 14px; font-size: 12.5px; font-weight: 500; color: var(--text-2); cursor: pointer; transition: all .12s; border: 1px solid var(--border); background: var(--surface); user-select: none; }
+.qf-item:hover { border-color: var(--blue); color: var(--blue); }
+.qf-item.active { background: var(--blue); color: #fff; border-color: var(--blue); }
+.qf-item .count { font-size: 10.5px; font-weight: 700; padding: 0 7px; background: var(--bg); height: 20px; display: flex; align-items: center; }
+.qf-item.active .count { background: rgba(255,255,255,0.18); color: #fff; }
+
+.card { background: var(--surface); border: 1px solid var(--border); }
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(390px, 1fr)); gap: 18px; padding: 20px; }
+
+.nc { border: 1px solid var(--border); background: var(--surface); transition: border-color .15s, box-shadow .15s; display: flex; flex-direction: column; }
+.nc:hover { border-color: var(--blue); box-shadow: 0 4px 16px rgba(0,0,0,0.04); }
+.nc-hdr { padding: 14px 18px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--border-soft); }
+.nc-id { font-size: 13px; font-weight: 700; color: var(--blue); display: flex; align-items: center; gap: 8px; }
+.nc-id .av-s { width: 22px; height: 22px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 8px; font-weight: 700; color: #fff; flex-shrink: 0; }
+.nc-status { font-size: 10.5px; font-weight: 600; padding: 4px 12px; letter-spacing: 0.02em; }
+.nc-status.unread { background: var(--red-bg); color: var(--red); }
+.nc-status.read { background: var(--green-bg); color: var(--green); }
+.nc-status.done { background: var(--text); color: #fff; }
+.nc-body { padding: 14px 18px; flex: 1; display: flex; flex-direction: column; gap: 10px; }
+.nc-product { display: flex; gap: 14px; }
+.nc-img { width: 62px; height: 46px; background: var(--bg); border: 1px solid var(--border-soft); flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 18px; }
+.nc-pi { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.nc-pi-r { display: flex; justify-content: space-between; align-items: center; }
+.nc-pi-r .l { font-size: 10.5px; font-weight: 600; color: var(--text-3); }
+.nc-pi-r .v { font-size: 12.5px; font-weight: 600; color: var(--text); }
+.nc-pi-r .v.disc { color: var(--green); }
+.nc-pi-r .v.strike { text-decoration: line-through; color: var(--text-3); font-weight: 500; font-size: 11.5px; }
+.nc-msg { font-size: 11.5px; color: var(--text-2); line-height: 1.55; padding: 10px 12px; background: var(--bg); border-left: 3px solid var(--border); }
+.nc-stage { display: flex; align-items: center; justify-content: space-between; padding: 12px 18px; background: var(--bg); border-top: 1px solid var(--border-soft); border-bottom: 1px solid var(--border-soft); }
+.nc-stage-l { display: flex; align-items: center; gap: 10px; }
+.nc-stage-dot { width: 7px; height: 7px; background: var(--blue); flex-shrink: 0; }
+.nc-stage-label { font-size: 12px; font-weight: 600; color: var(--text); }
+.nc-stage-sub { font-size: 10.5px; color: var(--text-2); font-weight: 500; display: flex; align-items: center; gap: 5px; }
+.sp { display: inline-flex; align-items: center; gap: 4px; font-size: 10px; font-weight: 700; padding: 4px 10px; letter-spacing: 0.02em; }
+.sp.neg { background: var(--green-bg); color: var(--green); }
+.sp.inv { background: var(--blue-bg); color: var(--blue); }
+.sp.ord { background: var(--purple-bg); color: var(--purple); }
+.sp.pay { background: var(--amber-bg); color: var(--amber); }
+.sp.ship { background: var(--teal-bg); color: var(--teal); }
+.sp.doc { background: var(--orange-bg); color: var(--orange); }
+.sp.send { background: var(--red-bg); color: var(--red); }
+.sp.recv { background: var(--green-bg); color: var(--green); }
+.sp.comp { background: var(--text); color: #fff; }
+.nc-progress { display: flex; align-items: center; justify-content: center; padding: 12px 18px; }
+.pd { width: 18px; height: 18px; display: flex; align-items: center; justify-content: center; font-size: 7.5px; font-weight: 700; color: #fff; }
+.pd.done { background: var(--green); }
+.pd.curr { background: var(--blue); box-shadow: 0 0 0 4px rgba(var(--blue-rgb),0.15); }
+.pd.pend { background: var(--text-3); }
+.pl { width: 20px; height: 2.5px; background: var(--border); flex-shrink: 0; }
+.pl.done { background: var(--green); }
+.nc-info { display: flex; border-top: 1px solid var(--border-soft); }
+.nc-ii { flex: 1; text-align: center; padding: 10px 6px; border-right: 1px solid var(--border-soft); }
+.nc-ii:last-child { border-right: none; }
+.nc-ii .l { font-size: 9.5px; font-weight: 600; color: var(--text-3); letter-spacing: 0.02em; }
+.nc-ii .v { font-size: 11px; font-weight: 600; color: var(--text); margin-top: 3px; display: flex; align-items: center; justify-content: center; gap: 5px; }
+.nc-foot { padding: 12px 18px; display: flex; justify-content: flex-end; border-top: 1px solid var(--border-soft); background: var(--bg); }
+.btn-outline { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 500; padding: 6px 14px; border: 1px solid var(--border); background: var(--surface); color: var(--text-2); cursor: pointer; transition: all .12s; font-family: inherit; }
+.btn-outline:hover { border-color: var(--blue); color: var(--blue); }
+
+.ac { width: 18px; height: 18px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 7px; font-weight: 700; color: #fff; flex-shrink: 0; }
+.av-lg { width: 38px; height: 38px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; color: #fff; flex-shrink: 0; }
+.ac.a{background:#1A56DB}.ac.b{background:#6638C0}.ac.c{background:#05905E}
+.ac.d{background:#D92D3A}.ac.e{background:#B8770A}.ac.f{background:#0B8E82}
+.ac.g{background:#4338CA}.ac.h{background:#C1223A}.ac.i{background:#B85A0A}
+.ac.j{background:#6366F1}.ac.k{background:#0A7490}.ac.l{background:#9333EA}
+.ac.m{background:#BE185D}.ac.n{background:#B85A0A}.ac.o{background:#2563EB}
+.ac.p{background:#16A34A}.ac.q{background:#D92D3A}.ac.r{background:#0891B2}
+.ac.s{background:#15803D}.ac.t{background:#6D28D9}.ac.u{background:#DC2626}
+.ac.v{background:#0A7490}.ac.w{background:#BE185D}.ac.x{background:#4F46E5}
+.ac.y{background:#65A30D}.ac.z{background:#B8770A}
+
+[class*=" ac."].av-lg { width: 32px; height: 32px; font-size: 11px; }
+
+/* MODAL */
+.modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.45); z-index: 1000; display: none; align-items: flex-start; justify-content: center; overflow-y: auto; padding: 40px 20px; backdrop-filter: blur(2px); }
+.modal-overlay.open { display: flex; }
+.modal { background: var(--surface); width: 100%; max-width: 720px; position: relative; animation: modalIn .2s ease; }
+@keyframes modalIn { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+
+.modal-hdr { display: flex; align-items: center; justify-content: space-between; padding: 20px 24px; border-bottom: 1px solid var(--border-soft); }
+.modal-hdr-l { display: flex; align-items: center; gap: 14px; }
+.modal-hdr-l .mh-av { }
+.modal-hdr-l .mh-t { }
+.modal-hdr-l .mh-t .mh-id { font-size: 16px; font-weight: 700; color: var(--text); }
+.modal-hdr-l .mh-t .mh-sub { font-size: 12px; color: var(--text-2); margin-top: 2px; display: flex; align-items: center; gap: 8px; }
+.modal-close { width: 34px; height: 34px; border: 1px solid var(--border); background: var(--surface); cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 18px; color: var(--text-2); transition: all .12s; font-family: inherit; }
+.modal-close:hover { border-color: var(--red); color: var(--red); }
+
+.modal-body { padding: 24px; }
+
+.mb-section { margin-bottom: 24px; }
+.mb-section:last-child { margin-bottom: 0; }
+.mb-label { font-size: 10.5px; font-weight: 700; color: var(--text-3); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
+.mb-label::after { content: ''; flex: 1; height: 1px; background: var(--border-soft); }
+
+.product-detail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.pd-item { display: flex; flex-direction: column; gap: 3px; padding: 10px 12px; background: var(--bg); }
+.pd-item .l { font-size: 10px; font-weight: 600; color: var(--text-3); letter-spacing: 0.03em; }
+.pd-item .v { font-size: 13px; font-weight: 600; color: var(--text); }
+
+.timeline { display: flex; flex-direction: column; gap: 0; }
+.tl-item { display: flex; gap: 14px; padding: 10px 0; position: relative; }
+.tl-item::before { content: ''; position: absolute; left: 15px; top: 36px; bottom: -1px; width: 2px; background: var(--border-soft); }
+.tl-item:last-child::before { display: none; }
+.tl-dot { width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; flex-shrink: 0; position: relative; z-index: 1; }
+.tl-dot.done.neg { background: #E4F7EF; color: #05905E; }
+.tl-dot.done.inv { background: #EBF1FE; color: #1A56DB; }
+.tl-dot.done.ord { background: #F0EAFB; color: #6638C0; }
+.tl-dot.done.pay { background: #FEF6E6; color: #B8770A; }
+.tl-dot.done.ship { background: #E8F8F6; color: #0B8E82; }
+.tl-dot.done.doc { background: #FEF2E8; color: #B85A0A; }
+.tl-dot.done.send { background: #FDEBED; color: #D92D3A; }
+.tl-dot.done.recv { background: #E4F7EF; color: #05905E; }
+.tl-dot.done.comp { background: #E4F7EF; color: #05905E; }
+.tl-dot.curr.neg { background: #E4F7EF; color: #05905E; box-shadow: 0 0 0 4px rgba(5,144,94,0.15); }
+.tl-dot.curr.inv { background: #EBF1FE; color: #1A56DB; box-shadow: 0 0 0 4px rgba(26,86,219,0.15); }
+.tl-dot.curr.ord { background: #F0EAFB; color: #6638C0; box-shadow: 0 0 0 4px rgba(102,56,192,0.15); }
+.tl-dot.curr.pay { background: #FEF6E6; color: #B8770A; box-shadow: 0 0 0 4px rgba(184,119,10,0.15); }
+.tl-dot.curr.ship { background: #E8F8F6; color: #0B8E82; box-shadow: 0 0 0 4px rgba(11,142,130,0.15); }
+.tl-dot.curr.doc { background: #FEF2E8; color: #B85A0A; box-shadow: 0 0 0 4px rgba(184,90,10,0.15); }
+.tl-dot.curr.send { background: #FDEBED; color: #D92D3A; box-shadow: 0 0 0 4px rgba(217,45,58,0.15); }
+.tl-dot.curr.recv { background: #E4F7EF; color: #05905E; box-shadow: 0 0 0 4px rgba(5,144,94,0.15); }
+.tl-dot.curr.comp { background: #E4F7EF; color: #05905E; box-shadow: 0 0 0 4px rgba(5,144,94,0.15); }
+.tl-dot.pend { background: var(--bg); color: var(--text-3); border: 2px solid var(--border); }
+.tl-body { flex: 1; min-width: 0; padding-top: 4px; }
+.tl-body .tl-title { font-size: 13px; font-weight: 600; color: var(--text); }
+.tl-body .tl-title.curr.neg { color: #05905E; }
+.tl-body .tl-title.curr.inv { color: #1A56DB; }
+.tl-body .tl-title.curr.ord { color: #6638C0; }
+.tl-body .tl-title.curr.pay { color: #B8770A; }
+.tl-body .tl-title.curr.ship { color: #0B8E82; }
+.tl-body .tl-title.curr.doc { color: #B85A0A; }
+.tl-body .tl-title.curr.send { color: #D92D3A; }
+.tl-body .tl-title.curr.recv { color: #05905E; }
+.tl-body .tl-title.curr.comp { color: #05905E; }
+.tl-body .tl-sub { font-size: 11.5px; color: var(--text-2); margin-top: 2px; display: flex; align-items: center; gap: 6px; }
+.tl-body .tl-stamp { font-size: 10.5px; color: var(--text-3); margin-top: 4px; display: flex; align-items: center; gap: 6px; }
+
+.user-row { display: flex; align-items: center; gap: 12px; padding: 12px 14px; background: var(--bg); border-left: 3px solid var(--border); }
+.user-row.blue { border-left-color: var(--blue); }
+.user-row.green { border-left-color: var(--green); }
+.user-row .ur-info { flex: 1; }
+.user-row .ur-info .ur-name { font-size: 13px; font-weight: 600; color: var(--text); }
+.user-row .ur-info .ur-label { font-size: 10.5px; color: var(--text-3); }
+
+.mb-actions { display: flex; gap: 10px; padding: 20px 24px; border-top: 1px solid var(--border-soft); justify-content: flex-end; background: var(--bg); }
+.btn-secondary { height: 38px; display: inline-flex; align-items: center; gap: 7px; font-size: 13px; font-weight: 500; padding: 0 18px; border: 1px solid var(--border); background: var(--surface); color: var(--text-2); cursor: pointer; transition: all .12s; font-family: inherit; }
+.btn-secondary:hover { border-color: var(--blue); color: var(--blue); }
+
+.pagination { display: flex; align-items: center; justify-content: space-between; padding: 14px 24px; border-top: 1px solid var(--border); background: var(--bg); }
+.pg-info { font-size: 12.5px; color: var(--text-2); }
+.pg-right { display: flex; align-items: center; gap: 14px; }
+.pg-size { display: flex; align-items: center; gap: 7px; font-size: 12.5px; color: var(--text-2); }
+.pg-size select { height: 28px; padding: 0 8px; border: 1px solid var(--border); font-size: 11.5px; font-weight: 500; color: var(--text); background: #fff; cursor: pointer; font-family: inherit; outline: none; }
+.pg-pages { display: flex; gap: 3px; }
+.pg-pages button { width: 30px; height: 30px; border: 1px solid var(--border); background: var(--surface); font-size: 12.5px; cursor: pointer; color: var(--text-2); display: flex; align-items: center; justify-content: center; transition: all .08s; font-weight: 500; }
+.pg-pages button:hover { background: var(--bg); border-color: var(--text-3); }
+.pg-pages button.active { background: var(--blue); color: #fff; border-color: var(--blue); }
+.pg-pages button.flat { border: none; background: none; pointer-events: none; }
+.pg-pages button.disabled { opacity: 0.3; pointer-events: none; }
+.pg-arrow { font-size: 15px !important; }
+.empty { grid-column: 1 / -1; padding: 70px 20px; text-align: center; color: var(--text-2); }
+.empty strong { color: var(--text); font-size: 15px; }
+
+@media (max-width: 860px) {
+  .page { padding: 24px 18px 48px; }
+  .grid { grid-template-columns: 1fr; }
+  .product-detail-grid { grid-template-columns: 1fr; }
+}
+</style>
+</head><body>
+
+<nav class="topnav">
+  <div><span class="bc">Admin</span><span class="bc-sep">/</span><span class="bc active">All Negotiations</span></div>
+  <div class="topnav-r"><div class="topnav-av">A</div></div>
+</nav>
+
+<div class="page">
+  <div class="page-hdr">
+    <div class="icon">
+      <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+    </div>
+    <div class="ht">
+      <h1>All Negotiations <span class="badge">Live</span></h1>
+      <p>Manage and track all negotiation workflows across every stage</p>
+    </div>
+  </div>
+
+  <div class="filter-card">
+    <div class="filter-item">
+      <label>Car ID</label>
+      <input type="number" id="carIdFilter" placeholder="e.g. 1042" style="width:110px;">
+    </div>
+    <div class="filter-item">
+      <label>User</label>
+      <select id="userFilter" style="width:140px;">
+        <option value="">All Users</option>
+        <option>Rajesh Kumar</option>
+        <option>Sarah M</option>
+        <option>John D</option>
+        <option>Priya L</option>
+        <option>Mike T</option>
+        <option>Anita K</option>
+      </select>
+    </div>
+    <div class="filter-item">
+      <label>Stage</label>
+      <select id="stageFilter" style="width:160px;"><option value="">All Stages</option></select>
+    </div>
+    <div class="filter-item">
+      <label>From</label>
+      <input type="date" style="width:140px;">
+    </div>
+    <div class="filter-item">
+      <label>To</label>
+      <input type="date" style="width:140px;">
+    </div>
+    <button class="btn-primary" onclick="applyFilters()">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      Search
+    </button>
+  </div>
+
+  <div class="quick-filters">
+    <div class="qf-item active" onclick="setFilter('all')">All <span class="count" id="cAll">24</span></div>
+    <div class="qf-item" onclick="setFilter('active')">Active <span class="count" id="cActive">8</span></div>
+    <div class="qf-item" onclick="setFilter('completed')">Completed <span class="count" id="cCompleted">16</span></div>
+    <div class="qf-item" onclick="setFilter('unread')">Unread <span class="count" id="cUnread">4</span></div>
+    <div class="qf-item" onclick="setFilter('payment')">Payment <span class="count" id="cPay">1</span></div>
+    <div class="qf-item" onclick="setFilter('shipping')">Shipping <span class="count" id="cShip">1</span></div>
+  </div>
+
+  <div class="card">
+    <div class="grid" id="grid"></div>
+    <div class="pagination" id="pagination"></div>
+  </div>
+</div>
+
+<!-- MODAL -->
+<div class="modal-overlay" id="modalOverlay" onclick="if(event.target===this)closeModal()">
+  <div class="modal" id="modalContent">
+    <div class="modal-hdr">
+      <div class="modal-hdr-l">
+        <div class="mh-av" id="mhAv">AK</div>
+        <div class="mh-t">
+          <div class="mh-id" id="mhId">NEG-1001</div>
+          <div class="mh-sub"><span id="mhStatus">Unread</span><span class="sp" id="mhStagePill" style="font-size:10px;">💬 Neg</span><span id="mhStage" style="font-weight:500;">NEGOTIATION</span></div>
+        </div>
+      </div>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div class="modal-body" id="modalBody"></div>
+    <div class="mb-actions">
+      <button class="btn-secondary" onclick="closeModal()">Close</button>
+      <button class="btn-primary" style="height:38px;font-size:13px;">Edit Negotiation</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const S = ['NEGOTIATION','ISSUE_PROFORMA_INVOICE','ORDER_ITEM','PAYMENT_CONFIRMATION','SHIPPING_SCHEDULE','DOCUMENT_COPIES','SEND_ORIGINAL_DOCUMENTS','ITEM_RECEIVED','COMPLETED'];
+const SN = ['NEGOTIATION','ISSUE PROFORMA INVOICE','ORDER ITEM','PAYMENT CONFIRMATION','SHIPPING SCHEDULE','DOCUMENT COPIES','SEND ORIGINAL DOCUMENTS','ITEM RECEIVED','COMPLETED'];
+const SO = { 'NEGOTIATION': {c:'neg',s:'Neg'},'ISSUE_PROFORMA_INVOICE':{c:'inv',s:'Invoice'},'ORDER_ITEM':{c:'ord',s:'Order'},'PAYMENT_CONFIRMATION':{c:'pay',s:'Payment'},'SHIPPING_SCHEDULE':{c:'ship',s:'Shipping'},'DOCUMENT_COPIES':{c:'doc',s:'Docs'},'SEND_ORIGINAL_DOCUMENTS':{c:'send',s:'Send'},'ITEM_RECEIVED':{c:'recv',s:'Rcvd'},'COMPLETED':{c:'comp',s:'Done'} };
+const SI = ['💬','📄','📋','💳','🚢','📑','📨','🤝','✅'];
+function fmt(s) { return s.replace(/_/g,' ').replace(/\b\w/g,c=>c.toUpperCase()); }
+function init(n) { return n.split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2); }
+function acl(n) { return (n[0]||'a').toLowerCase(); }
+
+const W = [
+  {id:1001,st:'NEGOTIATION',cb:'Rajesh Kumar',ub:'Rajesh Kumar',upd:'2026-07-10T14:30',ua:true,p:{idP:1042,br:'Toyota',mo:'Land Cruiser Prado',mi:18000,tr:42500,di:40000,re:'2023-01'},msg:'Customer requested 10% discount on the listed price. Price negotiation is currently in progress. We are awaiting the customer final decision before proceeding to invoicing.'},
+  {id:1002,st:'ISSUE_PROFORMA_INVOICE',cb:'Sarah M',ub:'Sarah M',upd:'2026-07-10T12:15',ua:false,p:{idP:1087,br:'Nissan',mo:'Patrol',mi:22500,tr:55200,di:52000,re:'2022-06'},msg:'Proforma invoice has been generated and shared with the customer for review and approval. Awaiting payment confirmation.'},
+  {id:1003,st:'ORDER_ITEM',cb:'John D',ub:'John D',upd:'2026-07-09T16:45',ua:true,p:{idP:1156,br:'Toyota',mo:'Hilux',mi:15300,tr:31800,di:30000,re:'2023-09'},msg:'Order has been placed with the supplier. Awaiting customer confirmation to proceed to the payment stage.'},
+  {id:1004,st:'PAYMENT_CONFIRMATION',cb:'Priya L',ub:'Priya L',upd:'2026-07-09T10:30',ua:false,p:{idP:1238,br:'Nissan',mo:'X-Trail',mi:11200,tr:24600,di:23500,re:'2023-11'},msg:'Payment receipt has been uploaded to the system. Verification in progress by the finance team.'},
+  {id:1005,st:'SHIPPING_SCHEDULE',cb:'Mike T',ub:'Admin',upd:'2026-07-08T09:00',ua:false,p:{idP:1342,br:'Toyota',mo:'Land Cruiser 300',mi:9800,tr:68000,di:65000,re:'2024-02'},msg:'Shipping schedule confirmed. Vessel is departing 25 July from Yokohama port. ETA will be shared soon.'},
+  {id:1006,st:'DOCUMENT_COPIES',cb:'Anita K',ub:'Anita K',upd:'2026-07-07T14:20',ua:true,p:{idP:1502,br:'Toyota',mo:'RAV4',mi:7500,tr:27800,di:26000,re:'2024-01'},msg:'Bill of lading and certificate of origin have been attached to the system for customer review.'},
+  {id:1007,st:'SEND_ORIGINAL_DOCUMENTS',cb:'Rajesh Kumar',ub:'Admin',upd:'2026-07-06T11:45',ua:false,p:{idP:1583,br:'Toyota',mo:'Fortuner',mi:12100,tr:36200,di:34000,re:'2023-12'},msg:'Original documents have been dispatched via DHL courier. Tracking number: DHL-789456123.'},
+  {id:1008,st:'ITEM_RECEIVED',cb:'Sarah M',ub:'Sarah M',upd:'2026-07-05T16:00',ua:false,p:{idP:1659,br:'Lexus',mo:'LX 600',mi:5600,tr:82000,di:79000,re:'2024-03'},msg:'Item has been received by the customer. We are awaiting formal acknowledgment of receipt.'},
+  {id:1009,st:'COMPLETED',cb:'John D',ub:'John D',upd:'2026-07-04T10:00',ua:false,p:{idP:1788,br:'Toyota',mo:'Alphard',mi:4200,tr:48500,di:47000,re:'2024-04'},msg:'Order has been completed successfully. All documents delivered and customer has signed off.'},
+  {id:1010,st:'NEGOTIATION',cb:'Mike T',ub:'Mike T',upd:'2026-07-10T08:15',ua:true,p:{idP:1901,br:'Toyota',mo:'Corolla Cross',mi:1900,tr:21300,di:20000,re:'2024-06'},msg:'New inquiry received for Corolla Cross. Initial offer of $20,000 has been submitted to the customer.'},
+  {id:1011,st:'ISSUE_PROFORMA_INVOICE',cb:'Priya L',ub:'Priya L',upd:'2026-07-08T13:30',ua:false,p:{idP:1947,br:'BMW',mo:'X5',mi:8400,tr:61200,di:58000,re:'2024-02'},msg:'Invoice has been prepared and sent to the customer for payment processing.'},
+  {id:1012,st:'ORDER_ITEM',cb:'Anita K',ub:'Anita K',upd:'2026-07-07T15:00',ua:true,p:{idP:1988,br:'Mercedes-Benz',mo:'GLE',mi:6700,tr:72400,di:69000,re:'2024-01'},msg:'Order has been confirmed by the customer. Proceeding to the payment stage.'}
+];
+
+let pg=1,ps=10,f='all',data=[...W];
+function si(s){return S.indexOf(s)}
+
+function setFilter(n){
+  document.querySelectorAll('.qf-item').forEach(e=>e.classList.remove('active'));
+  event.currentTarget.classList.add('active');
+  f=n; applyFilters();
+}
+function applyFilters(){
+  const sv=document.getElementById('stageFilter').value;
+  const cv=document.getElementById('carIdFilter').value;
+  const uv=document.getElementById('userFilter').value;
+  data=W.filter(w=>{
+    if(f==='active'&&w.st==='COMPLETED')return false;
+    if(f==='completed'&&w.st!=='COMPLETED')return false;
+    if(f==='unread'&&!w.ua)return false;
+    if(f==='payment'&&w.st!=='PAYMENT_CONFIRMATION')return false;
+    if(f==='shipping'&&w.st!=='SHIPPING_SCHEDULE')return false;
+    if(sv&&w.st!==sv)return false;
+    if(cv&&w.p.idP!==parseInt(cv))return false;
+    if(uv&&w.cb!==uv)return false;
+    return true;
+  });
+  pg=1;render();
+}
+
+function openModal(id){
+  const w=W.find(x=>x.id===id); if(!w)return;
+  const idx=si(w.st);
+  const inits=init(w.cb);
+  const ubInits=init(w.ub);
+  const ic=w.st==='COMPLETED';
+  const stx=ic?'Completed':(w.ua?'Unread':'Read');
+  const stageCls=SO[w.st]?SO[w.st].c:'neg';
+
+  document.getElementById('mhAv').className='mh-av av-lg ac.'+acl(w.cb);
+  document.getElementById('mhAv').textContent=inits;
+  document.getElementById('mhId').textContent='NEG-'+w.id;
+  document.getElementById('mhStatus').innerHTML='<span class="nc-status '+(ic?'done':(w.ua?'unread':'read'))+'">'+stx+'</span>';
+  document.getElementById('mhStagePill').className='sp '+stageCls;
+  document.getElementById('mhStagePill').innerHTML=SI[idx]+' '+SO[w.st].s;
+  document.getElementById('mhStage').textContent=fmt(w.st);
+
+  const dt=new Date(w.upd);
+  const ds=dt.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
+  const ts=dt.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'});
+
+  const timelineActs=[
+    {stage:'NEGOTIATION',by:'Rajesh Kumar',msg:'Negotiation started with initial offer'},
+    {stage:'ISSUE_PROFORMA_INVOICE',by:'Sarah M',msg:'Proforma invoice created and shared'},
+    {stage:'ORDER_ITEM',by:'John D',msg:'Order placed with supplier'},
+    {stage:'PAYMENT_CONFIRMATION',by:'Priya L',msg:'Payment confirmed and verified'},
+    {stage:'SHIPPING_SCHEDULE',by:'Mike T',msg:'Shipping scheduled with carrier'},
+    {stage:'DOCUMENT_COPIES',by:'Anita K',msg:'Copies of documents uploaded'},
+    {stage:'SEND_ORIGINAL_DOCUMENTS',by:'Admin',msg:'Original documents dispatched'},
+    {stage:'ITEM_RECEIVED',by:'Sarah M',msg:'Item received by customer'},
+    {stage:'COMPLETED',by:'John D',msg:'Order completed and closed'}
+  ];
+
+  let tlHtml='';
+  S.forEach((s,i)=>{
+    const dotCls=i<idx?'done '+(SO[s]?SO[s].c:'neg'):(i===idx?'curr '+(SO[s]?SO[s].c:'neg'):'pend');
+    const icon=i<idx?'✓':(i===idx?SI[idx]:'');
+    const isCurr=i===idx;
+    const act=i<=idx?timelineActs[i]:null;
+    const actInits=act?init(act.by):'';
+    const actCl=act?acl(act.by):'a';
+    tlHtml+=`<div class="tl-item">
+      <div class="tl-dot ${dotCls}">${icon}</div>
+      <div class="tl-body">
+        <div class="tl-title ${isCurr?'curr '+stageCls:''}">${SI[i]} ${SN[i]}</div>
+        ${act?`<div class="tl-sub"><span class="ac ${actCl}" style="width:18px;height:18px;font-size:6.5px;display:inline-flex;align-items:center;justify-content:center;border-radius:50%;color:#fff;flex-shrink:0;">${actInits}</span><strong>${act.by}</strong> — ${act.msg}</div>`:''}
+        ${i===idx?`<div class="tl-stamp">🕐 ${ds} at ${ts}</div>`:''}
+      </div>
+    </div>`;
+  });
+
+  const bodyHtml=`
+    <div class="mb-section">
+      <div class="mb-label">📦 Product Details</div>
+      <div class="product-detail-grid">
+        <div class="pd-item" style="border-left:3px solid var(--blue);"><span class="l">🏷️ Brand</span><span class="v">${w.p.br}</span></div>
+        <div class="pd-item" style="border-left:3px solid var(--purple);"><span class="l">🚗 Model</span><span class="v">${w.p.mo}</span></div>
+        <div class="pd-item" style="border-left:3px solid var(--blue);"><span class="l">🔢 Product ID</span><span class="v" style="color:var(--blue);font-weight:700;">PA-${w.p.idP}</span></div>
+        <div class="pd-item" style="border-left:3px solid var(--teal);"><span class="l">📏 Mileage</span><span class="v">${w.p.mi.toLocaleString()} km</span></div>
+        <div class="pd-item" style="border-left:3px solid var(--orange);"><span class="l">💰 Trade Price</span><span class="v" style="font-weight:500;color:var(--text-3);text-decoration:line-through;">$${w.p.tr.toLocaleString()}</span></div>
+        <div class="pd-item" style="border-left:3px solid var(--green);"><span class="l">🏷️ Discounted</span><span class="v" style="color:var(--green);font-weight:700;">$${w.p.di.toLocaleString()}</span></div>
+        <div class="pd-item" style="border-left:3px solid var(--amber);"><span class="l">📅 Registration</span><span class="v">${w.p.re.replace('-','/')}</span></div>
+        <div class="pd-item" style="border-left:3px solid var(--red);"><span class="l">🕐 Last Updated</span><span class="v">${ds}</span></div>
+      </div>
+    </div>
+    <div class="mb-section">
+      <div class="mb-label">📝 Customer Notes</div>
+      <div style="padding:14px 16px;background:var(--bg);font-size:13px;color:var(--text-2);line-height:1.7;border-left:3px solid var(--blue);">${w.msg}</div>
+    </div>
+    <div class="mb-section">
+      <div class="mb-label">👤 Users</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+        <div class="user-row blue"><div class="av-lg ac.${acl(w.cb)}">${inits}</div><div class="ur-info"><div class="ur-label">Created By</div><div class="ur-name">${w.cb}</div></div></div>
+        <div class="user-row green"><div class="av-lg ac.${acl(w.ub)}">${ubInits}</div><div class="ur-info"><div class="ur-label">Last Updated By</div><div class="ur-name">${w.ub}</div></div></div>
+      </div>
+    </div>
+    <div class="mb-section">
+      <div class="mb-label">🔄 Workflow Timeline</div>
+      <div class="timeline">${tlHtml}</div>
+    </div>
+  `;
+
+  document.getElementById('modalBody').innerHTML=bodyHtml;
+  document.getElementById('modalOverlay').classList.add('open');
+  document.body.style.overflow='hidden';
+}
+
+function closeModal(){
+  document.getElementById('modalOverlay').classList.remove('open');
+  document.body.style.overflow='';
+}
+
+function renderCards(){
+  const g=document.getElementById('grid');
+  const st=(pg-1)*ps;
+  const pd=data.slice(st,st+ps);
+  if(!pd.length){g.innerHTML='<div class="empty"><strong>No negotiations found</strong><div style="margin-top:6px;font-size:13px;">Try adjusting your filters</div></div>';return;}
+  g.innerHTML=pd.map(w=>{
+    const idx=si(w.st); const o=SO[w.st]||{c:'neg',s:'Neg'};
+    const ic=w.st==='COMPLETED'; const sc=ic?'done':(w.ua?'unread':'read'); const stx=ic?'Completed':(w.ua?'Unread':'Read');
+    let ph=''; S.forEach((_,i)=>{if(i>0)ph+=`<div class="pl ${i<=idx?'done':''}"></div>`;ph+=`<div class="pd ${i<idx?'done':(i===idx?'curr':'pend')}">${i<idx?'✓':''}</div>`;});
+    const d=new Date(w.upd); const ds=d.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
+    const inits=init(w.cb); const ubInits=init(w.ub);
+    return `<div class="nc">
+      <div class="nc-hdr"><div class="nc-id"><span class="av-s ac.${acl(w.cb)}">${inits}</span>NEG-${w.id}</div><div class="nc-status ${sc}">${stx}</div></div>
+      <div class="nc-body">
+        <div class="nc-product"><div class="nc-img">${SI[idx]}</div>
+          <div class="nc-pi">
+            <div class="nc-pi-r"><span class="l">Product</span><span class="v">${w.p.br} ${w.p.mo}</span></div>
+            <div class="nc-pi-r"><span class="l">ID</span><span class="v" style="color:var(--blue);">PA-${w.p.idP}</span></div>
+            <div class="nc-pi-r"><span class="l">Mileage</span><span class="v">${w.p.mi.toLocaleString()} km</span></div>
+            <div class="nc-pi-r"><span class="l">Price</span><span class="v strike">$${w.p.tr.toLocaleString()}</span><span class="v disc">$${w.p.di.toLocaleString()}</span></div>
+          </div>
+        </div>
+        <div class="nc-msg">${w.msg}</div>
+      </div>
+      <div class="nc-stage">
+        <div class="nc-stage-l">
+          <div class="nc-stage-dot"></div>
+          <div><div class="nc-stage-label">${fmt(w.st)}</div><div class="nc-stage-sub"><span class="ac.${acl(w.ub)}" style="width:18px;height:18px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:7px;font-weight:700;color:#fff;flex-shrink:0;">${ubInits}</span>${w.ub}</div></div>
+        </div>
+        <span class="sp ${o.c}">${SI[idx]} ${o.s}</span>
+      </div>
+      <div class="nc-progress">${ph}</div>
+      <div class="nc-info">
+        <div class="nc-ii"><div class="l">Created By</div><div class="v"><span class="ac.${acl(w.cb)}">${inits}</span>${w.cb}</div></div>
+        <div class="nc-ii"><div class="l">Updated</div><div class="v">${ds}</div></div>
+        <div class="nc-ii"><div class="l">Registration</div><div class="v">${w.p.re.replace('-','/')}</div></div>
+      </div>
+      <div class="nc-foot"><button class="btn-outline" onclick="openModal(${w.id})">View Details <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg></button></div>
+    </div>`;
+  }).join('');
+}
+
+function renderPag(){
+  const el=document.getElementById('pagination');
+  const t=Math.max(1,Math.ceil(data.length/ps));
+  if(data.length<=ps){el.innerHTML='';return;}
+  const st=(pg-1)*ps+1; const en=Math.min(pg*ps,data.length);
+  let h=`<div class="pg-info">Showing ${st}&ndash;${en} of ${data.length}</div><div class="pg-right"><div class="pg-size"><label>Rows:</label><select onchange="cps(this.value)">${[5,10,25,50,100].map(n=>`<option value="${n}" ${n===ps?'selected':''}>${n}</option>`).join('')}</select></div><div class="pg-pages">`;
+  h+=`<button class="pg-arrow ${pg===1?'disabled':''}" onclick="gtp(${pg-1})">&#8249;</button>`;
+  const pgs=[]; for(let i=1;i<=t;i++){if(i===1||i===t||(i>=pg-1&&i<=pg+1))pgs.push(i);else if(pgs[pgs.length-1]!==-1)pgs.push(-1);}
+  pgs.forEach(p=>{if(p===-1)h+='<button class="flat">&hellip;</button>';else h+=`<button class="${p===pg?'active':''}" onclick="gtp(${p})">${p}</button>`;});
+  h+=`<button class="pg-arrow ${pg===t?'disabled':''}" onclick="gtp(${pg+1})">&#8250;</button></div></div>`;
+  el.innerHTML=h;
+}
+
+function cps(s){ps=parseInt(s);pg=1;render();}
+function gtp(p){if(p<1||p>Math.ceil(data.length/ps))return;pg=p;render();}
+
+function render(){
+  const a=W.filter(w=>w.st!=='COMPLETED').length; const c=W.filter(w=>w.st==='COMPLETED').length;
+  const u=W.filter(w=>w.ua).length; const py=W.filter(w=>w.st==='PAYMENT_CONFIRMATION').length; const sh=W.filter(w=>w.st==='SHIPPING_SCHEDULE').length;
+  document.getElementById('cAll').textContent=W.length; document.getElementById('cActive').textContent=a;
+  document.getElementById('cCompleted').textContent=c; document.getElementById('cUnread').textContent=u;
+  document.getElementById('cPay').textContent=py; document.getElementById('cShip').textContent=sh;
+  renderCards();renderPag();
+}
+
+const sel=document.getElementById('stageFilter');
+S.forEach(s=>{const o=document.createElement('option');o.value=s;o.textContent=SO[s].s+' — '+fmt(s);sel.appendChild(o);});
+render();
+</script>
+</body></html>

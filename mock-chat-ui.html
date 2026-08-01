@@ -1,0 +1,1255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Chat — Enterprise Messaging</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;450;500;550;600;650;700;800&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Inter', -apple-system, sans-serif;
+    background: #E8E6E1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    padding: 24px;
+  }
+  .app {
+    width: 1320px;
+    height: 840px;
+    background: #FFF;
+    border-radius: 14px;
+    display: flex;
+    overflow: hidden;
+    box-shadow:
+      0 0 0 1px rgba(0,0,0,0.05),
+      0 2px 8px rgba(0,0,0,0.04),
+      0 8px 24px rgba(0,0,0,0.06),
+      0 32px 64px rgba(0,0,0,0.1);
+    position: relative;
+  }
+
+  /* ══ MAC TRAFFIC LIGHTS ══ */
+  .traffic-lights {
+    position: absolute;
+    top: 14px;
+    left: 16px;
+    display: flex;
+    gap: 7px;
+    z-index: 10;
+  }
+  .traffic-lights .dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    transition: opacity .12s;
+  }
+  .traffic-lights .dot:hover { opacity: 0.7; }
+  .traffic-lights .dot.close { background: #FF5F57; }
+  .traffic-lights .dot.minimize { background: #FEBC2E; }
+  .traffic-lights .dot.maximize { background: #28C840; }
+
+  /* ══ SIDEBAR ══ */
+  .sidebar {
+    width: 340px;
+    flex-shrink: 0;
+    border-right: 1px solid #EDEDED;
+    display: flex;
+    flex-direction: column;
+    background: #FBFAF8;
+  }
+  .sidebar-head {
+    padding: 44px 18px 12px;
+    border-bottom: 1px solid #EDEDED;
+    flex-shrink: 0;
+  }
+  .sidebar-head-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 14px;
+  }
+  .sidebar-head-left {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .sidebar-head-left svg { color: #333; }
+  .sidebar-title {
+    font-size: 16px;
+    font-weight: 640;
+    color: #1A1A1A;
+    letter-spacing: -0.02em;
+  }
+  .thread-count {
+    font-size: 10px;
+    font-weight: 600;
+    color: #FFF;
+    background: #1A1A1A;
+    padding: 1px 8px;
+    border-radius: 12px;
+    letter-spacing: 0.01em;
+  }
+  .sidebar-head-actions {
+    display: flex;
+    gap: 1px;
+  }
+  .sidebar-head-actions button {
+    width: 28px; height: 28px;
+    border: none; border-radius: 6px;
+    background: transparent;
+    color: #BFBFBF;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: background .12s, color .12s;
+  }
+  .sidebar-head-actions button:hover { background: #EDEDED; color: #333; }
+
+  .search-wrap {
+    position: relative;
+    margin-bottom: 10px;
+  }
+  .search-wrap svg {
+    position: absolute;
+    left: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #BFBFBF;
+    pointer-events: none;
+  }
+  .search-input {
+    width: 100%;
+    height: 34px;
+    padding: 0 10px 0 32px;
+    border: none;
+    border-radius: 8px;
+    font-size: 13px;
+    font-family: inherit;
+    color: #1A1A1A;
+    background: #F0F0EE;
+    outline: none;
+    transition: background .15s, box-shadow .15s;
+  }
+  .search-input::placeholder { color: #BFBFBF; }
+  .search-input:focus {
+    background: #FFF;
+    box-shadow: inset 0 0 0 1.5px #1A1A1A;
+  }
+
+  .filter-row {
+    display: flex;
+    gap: 3px;
+    background: #F0F0EE;
+    border-radius: 8px;
+    padding: 2px;
+  }
+  .filter-btn {
+    flex: 1;
+    height: 28px;
+    border: none;
+    border-radius: 6px;
+    background: transparent;
+    font-size: 12px;
+    font-weight: 520;
+    color: #888;
+    cursor: pointer;
+    font-family: inherit;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    transition: all .15s;
+  }
+  .filter-btn.active {
+    background: #FFF;
+    color: #1A1A1A;
+    font-weight: 570;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.06);
+  }
+  .filter-btn .badge {
+    font-size: 9.5px;
+    font-weight: 600;
+    color: #BFBFBF;
+    padding: 0 6px;
+    border-radius: 5px;
+  }
+  .filter-btn.active .badge { color: #888; }
+
+  .thread-list {
+    flex: 1;
+    overflow-y: auto;
+    padding: 4px 0;
+  }
+  .thread-list::-webkit-scrollbar { width: 4px; }
+  .thread-list::-webkit-scrollbar-thumb { background: #EDEDED; border-radius: 3px; }
+
+  .thread-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 10px 18px;
+    cursor: pointer;
+    transition: background .1s;
+    position: relative;
+  }
+  .thread-item::after {
+    content: '';
+    position: absolute;
+    left: 18px;
+    right: 18px;
+    bottom: 0;
+    height: 1px;
+    background: #F5F5F3;
+  }
+  .thread-item:last-child::after { display: none; }
+  .thread-item:hover { background: #F5F5F3; }
+  .thread-item.active { background: #FFF; }
+  .thread-item.active::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 3px;
+    background: #1A1A1A;
+    border-radius: 0 2px 2px 0;
+  }
+
+  .avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    font-weight: 600;
+    color: #FFF;
+    flex-shrink: 0;
+    position: relative;
+  }
+  .avatar-sm { width: 32px; height: 32px; font-size: 12px; border-radius: 8px; }
+  .avatar-xs { width: 26px; height: 26px; font-size: 10px; border-radius: 6px; }
+  .av-orange  { background: #D97706; }
+  .av-green   { background: #059669; }
+  .av-indigo  { background: #6366F1; }
+  .av-rose    { background: #E11D48; }
+  .av-sky     { background: #0284C7; }
+  .av-violet  { background: #8B5CF6; }
+  .av-teal    { background: #0D9488; }
+  .av-amber   { background: #D97706; }
+
+  .online-dot {
+    position: absolute;
+    bottom: -1px;
+    right: -2px;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: #16A34A;
+    border: 2px solid #FBFAF8;
+  }
+  .thread-item.active .online-dot { border-color: #FFF; }
+
+  .thread-info { flex: 1; min-width: 0; }
+  .thread-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1px;
+  }
+  .thread-name {
+    font-size: 13px;
+    font-weight: 550;
+    color: #1A1A1A;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .thread-name.unread { font-weight: 650; }
+  .thread-time {
+    font-size: 11px;
+    color: #BFBFBF;
+    white-space: nowrap;
+    flex-shrink: 0;
+    margin-left: 8px;
+  }
+  .thread-product {
+    font-size: 11.5px;
+    color: #888;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin-bottom: 2px;
+  }
+  .thread-msg-preview {
+    font-size: 12px;
+    color: #BFBFBF;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    line-height: 1.4;
+  }
+
+  .thread-right {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 3px;
+    flex-shrink: 0;
+    margin-left: 6px;
+  }
+  .thread-unread {
+    font-size: 10px;
+    font-weight: 650;
+    color: #FFF;
+    background: #DC2626;
+    min-width: 17px;
+    height: 17px;
+    border-radius: 9px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 5px;
+  }
+  .tag-label {
+    font-size: 9px;
+    font-weight: 650;
+    padding: 1px 7px;
+    border-radius: 5px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+  .tag-label.hot { background: #FEF2F2; color: #DC2626; }
+  .tag-label.new { background: #F0FDF4; color: #059669; }
+  .tag-label.urgent { background: #FFF7ED; color: #EA580C; }
+  .tag-label.waiting { background: #EFF6FF; color: #2563EB; }
+  .tag-label.docs { background: #FAF5FF; color: #7C3AED; }
+
+  .skeleton {
+    padding: 10px 18px;
+    display: flex;
+    gap: 10px;
+    align-items: center;
+  }
+  .skeleton .sk-avatar {
+    width: 40px; height: 40px; border-radius: 10px;
+    background: linear-gradient(90deg, #EDEDED 25%, #F5F5F3 50%, #EDEDED 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.8s infinite;
+  }
+  .skeleton .sk-lines { flex: 1; }
+  .skeleton .sk-line {
+    height: 9px; border-radius: 4px; margin-bottom: 6px;
+    background: linear-gradient(90deg, #EDEDED 25%, #F5F5F3 50%, #EDEDED 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.8s infinite;
+  }
+  .skeleton .sk-line:last-child { width: 55%; margin-bottom: 0; }
+  @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+
+  .empty-threads {
+    text-align: center;
+    padding: 48px 20px;
+  }
+  .empty-threads .et-icon {
+    width: 48px; height: 48px; border-radius: 12px;
+    background: #F5F5F3;
+    display: flex; align-items: center; justify-content: center;
+    margin: 0 auto 12px;
+    color: #CCC;
+  }
+  .empty-threads .et-title { font-size: 14px; font-weight: 550; color: #888; margin-bottom: 4px; }
+  .empty-threads .et-sub { font-size: 12px; color: #BFBFBF; }
+
+  /* ══ MAIN CHAT ══ */
+  .main-chat {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+  }
+
+  .no-selection {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    background: #FBFAF8;
+  }
+  .no-selection .ns-icon {
+    width: 64px; height: 64px; border-radius: 16px;
+    background: #F0F0EE;
+    display: flex; align-items: center; justify-content: center;
+    color: #CCC;
+    margin-bottom: 4px;
+  }
+  .no-selection .ns-title { font-size: 15px; font-weight: 560; color: #888; }
+  .no-selection .ns-sub { font-size: 13px; color: #BFBFBF; }
+
+  .chat-topbar {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 44px 20px 12px;
+    border-bottom: 1px solid #EDEDED;
+    flex-shrink: 0;
+    background: #FFF;
+  }
+  .topbar-info { flex: 1; min-width: 0; }
+  .topbar-name {
+    font-size: 14px; font-weight: 600; color: #1A1A1A;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .topbar-meta {
+    font-size: 11.5px; color: #BFBFBF; font-weight: 470;
+    display: flex; align-items: center; gap: 6px;
+    flex-wrap: wrap;
+  }
+  .topbar-meta .online { color: #16A34A; font-weight: 550; }
+  .topbar-meta .offline { color: #BFBFBF; }
+  .topbar-meta .sep { color: #EDEDED; }
+  .topbar-meta .mlabel {
+    font-size: 9px; font-weight: 650; text-transform: uppercase;
+    letter-spacing: 0.04em;
+    padding: 1px 7px;
+    border-radius: 5px;
+  }
+  .topbar-meta .mlabel.priority { background: #FEF2F2; color: #DC2626; }
+  .topbar-meta .mlabel.vip { background: #FFF7ED; color: #EA580C; }
+
+  .topbar-actions {
+    display: flex;
+    gap: 1px;
+  }
+  .topbar-actions button {
+    width: 30px; height: 30px;
+    border: none; border-radius: 7px;
+    background: transparent;
+    color: #BFBFBF;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background .12s, color .12s;
+  }
+  .topbar-actions button:hover { background: #F0F0EE; color: #333; }
+
+  .product-bar {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 6px 20px;
+    background: #FBFAF8;
+    border-bottom: 1px solid #EDEDED;
+    flex-shrink: 0;
+  }
+  .product-bar-img {
+    width: 30px; height: 30px;
+    border-radius: 7px;
+    background: #F0F0EE;
+    display: flex; align-items: center; justify-content: center;
+    color: #BFBFBF;
+    flex-shrink: 0;
+    overflow: hidden;
+  }
+  .product-bar-info { flex: 1; min-width: 0; }
+  .product-bar-name {
+    font-size: 12px; font-weight: 540; color: #555;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .product-bar-id {
+    font-size: 10.5px; color: #BFBFBF;
+  }
+  .product-bar-tags {
+    display: flex;
+    gap: 4px;
+    flex-shrink: 0;
+    margin-left: 8px;
+  }
+  .product-bar-price {
+    font-size: 13px; font-weight: 620; color: #1A1A1A;
+    flex-shrink: 0; margin-left: 8px;
+  }
+  .pbadge {
+    font-size: 9px;
+    font-weight: 650;
+    padding: 2px 8px;
+    border-radius: 5px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+  .pbadge.available { background: #F0FDF4; color: #059669; }
+  .pbadge.pending { background: #FFF7ED; color: #EA580C; }
+  .pbadge.sold { background: #FEF2F2; color: #DC2626; }
+  .pbadge.inspection { background: #EFF6FF; color: #2563EB; }
+  .pbadge.shipping { background: #FAF5FF; color: #7C3AED; }
+
+  /* Messages area */
+  .messages-area {
+    flex: 1;
+    overflow-y: auto;
+    padding: 12px 20px 4px;
+    background: #FBFAF8;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+  .messages-area::-webkit-scrollbar { width: 4px; }
+  .messages-area::-webkit-scrollbar-thumb { background: #EDEDED; border-radius: 3px; }
+
+  .date-label {
+    text-align: center;
+    font-size: 11px;
+    font-weight: 500;
+    color: #CCC;
+    margin: 2px 0 8px;
+    position: relative;
+  }
+  .date-label span {
+    background: #FBFAF8;
+    padding: 0 12px;
+    position: relative;
+    z-index: 1;
+    font-size: 10.5px;
+    color: #BFBFBF;
+  }
+
+  .msg {
+    display: flex;
+    gap: 8px;
+    max-width: 78%;
+    animation: msgIn .2s ease both;
+  }
+  @keyframes msgIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+  .msg.incoming { align-self: flex-start; }
+  .msg.outgoing {
+    align-self: flex-end;
+    flex-direction: row-reverse;
+  }
+  .msg .avatar { flex-shrink: 0; }
+  .msg-body { min-width: 0; }
+  .msg-bubble {
+    padding: 8px 13px;
+    border-radius: 8px;
+    font-size: 13.5px;
+    line-height: 1.5;
+    word-wrap: break-word;
+    position: relative;
+  }
+  .msg.incoming .msg-bubble {
+    background: #FFF;
+    color: #333;
+    border: 1px solid #EDEDED;
+    border-bottom-left-radius: 3px;
+  }
+  .msg.outgoing .msg-bubble {
+    background: #1A1A1A;
+    color: #FFF;
+    border-bottom-right-radius: 3px;
+  }
+  .msg-time {
+    font-size: 10px;
+    color: #CCC;
+    margin-top: 3px;
+    padding-left: 2px;
+  }
+  .msg.outgoing .msg-time { text-align: right; padding-right: 2px; color: #CCC; }
+
+  .msg-attachment {
+    margin-top: 5px;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 10px;
+    background: #F5F5F3;
+    border-radius: 6px;
+    font-size: 12px;
+    color: #333;
+    cursor: default;
+    text-decoration: none;
+    transition: background .1s;
+  }
+  .msg-attachment:hover { background: #EDEDED; }
+  .msg-attachment svg { color: #888; flex-shrink: 0; }
+  .msg.outgoing .msg-attachment { background: rgba(255,255,255,0.08); color: rgba(255,255,255,0.85); }
+  .msg.outgoing .msg-attachment svg { color: rgba(255,255,255,0.45); }
+  .msg.outgoing .msg-attachment:hover { background: rgba(255,255,255,0.14); }
+
+  .msg-divider {
+    text-align: center;
+    font-size: 10px;
+    font-weight: 600;
+    color: #FFF;
+    position: relative;
+    margin: 16px 0 12px;
+  }
+  .msg-divider span {
+    background: #DC2626;
+    padding: 2px 14px;
+    border-radius: 12px;
+    position: relative;
+    z-index: 1;
+    font-size: 10px;
+    letter-spacing: 0.02em;
+  }
+
+  .empty-messages {
+    text-align: center;
+    padding: 40px 0;
+  }
+  .empty-messages .em-icon {
+    width: 40px; height: 40px; border-radius: 10px;
+    background: #F0F0EE;
+    display: flex; align-items: center; justify-content: center;
+    margin: 0 auto 8px;
+    color: #CCC;
+  }
+  .empty-messages span { font-size: 13px; color: #BFBFBF; }
+
+  .typing-indicator {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 4px 0;
+    animation: msgIn .2s ease;
+  }
+  .typing-dots {
+    display: flex;
+    gap: 3px;
+    padding: 8px 12px;
+    background: #FFF;
+    border: 1px solid #EDEDED;
+    border-radius: 8px;
+    border-bottom-left-radius: 3px;
+  }
+  .typing-dots span {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: #CCC;
+    animation: bounce 1.4s ease infinite;
+  }
+  .typing-dots span:nth-child(2) { animation-delay: .2s; }
+  .typing-dots span:nth-child(3) { animation-delay: .4s; }
+  @keyframes bounce { 0%, 60%, 100% { transform: translateY(0); } 30% { transform: translateY(-4px); } }
+
+  /* ══ INPUT ══ */
+  .input-area {
+    padding: 10px 20px 14px;
+    border-top: 1px solid #EDEDED;
+    background: #FFF;
+    flex-shrink: 0;
+  }
+  .input-row {
+    display: flex;
+    align-items: flex-end;
+    gap: 8px;
+  }
+  .input-wrap {
+    flex: 1;
+    position: relative;
+  }
+  .input-actions {
+    display: flex;
+    gap: 1px;
+    position: absolute;
+    left: 6px;
+    bottom: 7px;
+  }
+  .input-actions button {
+    width: 24px; height: 24px;
+    border: none; border-radius: 5px;
+    background: transparent;
+    color: #BFBFBF;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background .1s, color .1s;
+  }
+  .input-actions button:hover { background: #F0F0EE; color: #888; }
+  .input-wrap textarea {
+    width: 100%;
+    height: 40px;
+    min-height: 40px;
+    max-height: 100px;
+    padding: 10px 40px 10px 34px;
+    border: 1px solid #EDEDED;
+    border-radius: 9px;
+    font-size: 13px;
+    font-family: inherit;
+    color: #1A1A1A;
+    background: #F5F5F3;
+    resize: none;
+    outline: none;
+    transition: border-color .15s, background .15s;
+    line-height: 1.5;
+  }
+  .input-wrap textarea::placeholder { color: #BFBFBF; }
+  .input-wrap textarea:focus { border-color: #1A1A1A; background: #FFF; }
+
+  .send-btn {
+    width: 40px; height: 40px;
+    border: none; border-radius: 9px;
+    background: #1A1A1A;
+    color: #FFF;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: background .15s, transform .1s;
+  }
+  .send-btn:hover { background: #333; transform: scale(1.04); }
+  .send-btn:active { transform: scale(0.96); }
+
+  /* ══ RIGHT PANEL ══ */
+  .right-panel {
+    width: 270px;
+    flex-shrink: 0;
+    border-left: 1px solid #EDEDED;
+    background: #FBFAF8;
+    display: flex;
+    flex-direction: column;
+  }
+  .right-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 44px 18px 12px;
+    border-bottom: 1px solid #EDEDED;
+  }
+  .right-head span {
+    font-size: 11px;
+    font-weight: 620;
+    color: #888;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+  .right-head button {
+    width: 26px; height: 26px;
+    border: none; border-radius: 6px;
+    background: transparent;
+    color: #BFBFBF;
+    cursor: pointer;
+    display: flex;
+    align-items: center; justify-content: center;
+    transition: background .1s;
+  }
+  .right-head button:hover { background: #EDEDED; color: #888; }
+
+  .right-body {
+    flex: 1;
+    padding: 12px 18px;
+    overflow-y: auto;
+  }
+
+  .customer-card {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+    background: #FFF;
+    border: 1px solid #EDEDED;
+    border-radius: 9px;
+    margin-bottom: 14px;
+  }
+  .customer-card-info { flex: 1; min-width: 0; }
+  .customer-card-name { font-size: 13px; font-weight: 560; color: #1A1A1A; }
+  .customer-card-username { font-size: 10.5px; color: #BFBFBF; margin-top: 1px; }
+  .customer-card-tags {
+    display: flex;
+    gap: 3px;
+    margin-top: 4px;
+  }
+
+  .detail-section { margin-bottom: 16px; }
+  .detail-section:last-child { margin-bottom: 0; }
+  .detail-section-title {
+    font-size: 10px;
+    font-weight: 650;
+    color: #BFBFBF;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    margin-bottom: 8px;
+  }
+  .detail-row {
+    display: flex;
+    align-items: center;
+    padding: 4px 0;
+    gap: 6px;
+  }
+  .detail-label {
+    font-size: 12px;
+    color: #AAA;
+    width: 70px;
+    flex-shrink: 0;
+  }
+  .detail-value {
+    font-size: 12px;
+    color: #555;
+    font-weight: 480;
+    word-break: break-word;
+    flex: 1;
+  }
+
+  .status-lozenge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 2px 9px;
+    border-radius: 20px;
+    font-size: 10.5px;
+    font-weight: 540;
+    border: 1px solid;
+  }
+  .status-lozenge .dot { width: 5px; height: 5px; border-radius: 50%; }
+  .status-lozenge.unread {
+    background: #FFF;
+    border-color: #EDEDED;
+    color: #888;
+  }
+  .status-lozenge.unread .dot { background: #DC2626; }
+  .status-lozenge.read {
+    background: #F0FDF4;
+    border-color: #D1FAE5;
+    color: #059669;
+  }
+  .status-lozenge.read .dot { background: #059669; }
+
+  .detail-divider { height: 1px; background: #EDEDED; margin: 12px 0; }
+
+  .quick-action-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+    padding: 7px 10px;
+    border: none;
+    border-radius: 7px;
+    background: transparent;
+    color: #555;
+    font-size: 12.5px;
+    font-family: inherit;
+    cursor: pointer;
+    transition: background .1s;
+  }
+  .quick-action-btn:hover { background: #F0F0EE; }
+  .quick-action-btn svg { color: #AAA; flex-shrink: 0; }
+
+  @media (max-width: 1100px) { .right-panel { display: none; } .app { width: 100%; } }
+  @media (max-width: 768px) { body { padding: 0; } .app { height: 100vh; border-radius: 0; } .sidebar { width: 100%; } }
+</style>
+</head>
+<body>
+
+<div class="app">
+
+  <!-- ══ MAC TRAFFIC LIGHTS ══ -->
+  <div class="traffic-lights">
+    <span class="dot close" title="Close"></span>
+    <span class="dot minimize" title="Minimize"></span>
+    <span class="dot maximize" title="Maximize"></span>
+  </div>
+
+  <!-- ══ SIDEBAR ══ -->
+  <div class="sidebar">
+    <div class="sidebar-head">
+      <div class="sidebar-head-row">
+        <div class="sidebar-head-left">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+          <span class="sidebar-title">Messages</span>
+          <span class="thread-count">12</span>
+        </div>
+        <div class="sidebar-head-actions">
+          <button title="Refresh">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+          </button>
+          <button title="New message">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          </button>
+        </div>
+      </div>
+      <div class="search-wrap">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input class="search-input" type="text" placeholder="Search conversations…">
+      </div>
+      <div class="filter-row">
+        <button class="filter-btn active">All <span class="badge">12</span></button>
+        <button class="filter-btn">Unread <span class="badge">4</span></button>
+      </div>
+    </div>
+
+    <div class="thread-list">
+      <!-- Active thread with PRIORITY tag -->
+      <div class="thread-item active">
+        <div class="avatar av-orange">JD<span class="online-dot"></span></div>
+        <div class="thread-info">
+          <div class="thread-top">
+            <span class="thread-name unread">John Decker</span>
+            <span class="thread-time">2:34p</span>
+          </div>
+          <div class="thread-product">Toyota Harrier 2021</div>
+          <div class="thread-msg-preview">Thanks for the update. When can I expect the shipping confirmation?</div>
+        </div>
+        <div class="thread-right">
+          <span class="tag-label hot">Hot</span>
+          <span class="thread-unread">3</span>
+        </div>
+      </div>
+
+      <!-- With URGENT tag -->
+      <div class="thread-item">
+        <div class="avatar av-indigo">SM<span class="online-dot"></span></div>
+        <div class="thread-info">
+          <div class="thread-top">
+            <span class="thread-name unread">Sarah Mitchell</span>
+            <span class="thread-time">1:15p</span>
+          </div>
+          <div class="thread-product">BMW X5 2023</div>
+          <div class="thread-msg-preview">I've reviewed the inspection report. There are a few concerns about the engine</div>
+        </div>
+        <div class="thread-right">
+          <span class="tag-label urgent">Urgent</span>
+          <span class="thread-unread">1</span>
+        </div>
+      </div>
+
+      <!-- With DOCS tag -->
+      <div class="thread-item">
+        <div class="avatar av-green">RK</div>
+        <div class="thread-info">
+          <div class="thread-top">
+            <span class="thread-name">Ravi Kumar</span>
+            <span class="thread-time">11:42a</span>
+          </div>
+          <div class="thread-product">Honda Civic 2022</div>
+          <div class="thread-msg-preview">Payment receipt attached: invoice #INV-2024-0891</div>
+        </div>
+        <div class="thread-right">
+          <span class="tag-label docs">Docs</span>
+        </div>
+      </div>
+
+      <!-- NEW tag -->
+      <div class="thread-item">
+        <div class="avatar av-rose">AL<span class="online-dot"></span></div>
+        <div class="thread-info">
+          <div class="thread-top">
+            <span class="thread-name">Alice Lim</span>
+            <span class="thread-time">Yesterday</span>
+          </div>
+          <div class="thread-product">Mercedes-Benz C200</div>
+          <div class="thread-msg-preview">Can you share the vehicle history report? I'd like to review before proceeding.</div>
+        </div>
+        <div class="thread-right">
+          <span class="tag-label new">New</span>
+        </div>
+      </div>
+
+      <!-- WAITING tag -->
+      <div class="thread-item">
+        <div class="avatar av-sky">TW</div>
+        <div class="thread-info">
+          <div class="thread-top">
+            <span class="thread-name">Tommy Wong</span>
+            <span class="thread-time">Yesterday</span>
+          </div>
+          <div class="thread-product">Nissan Patrol 2023</div>
+          <div class="thread-msg-preview">Great! I'll arrange the inspection for Friday. Will keep you posted.</div>
+        </div>
+        <div class="thread-right">
+          <span class="tag-label waiting">Waiting</span>
+        </div>
+      </div>
+
+      <div class="thread-item">
+        <div class="avatar av-violet">EC</div>
+        <div class="thread-info">
+          <div class="thread-top">
+            <span class="thread-name">Emily Chen</span>
+            <span class="thread-time">Yesterday</span>
+          </div>
+          <div class="thread-product">Toyota Vellfire 2022</div>
+          <div class="thread-msg-preview">Shipping documents ready. Kindly confirm your address to proceed.</div>
+        </div>
+        <div class="thread-right">
+          <span class="tag-label docs">Docs</span>
+        </div>
+      </div>
+
+      <!-- Skeleton -->
+      <div class="skeleton">
+        <div class="sk-avatar"></div>
+        <div class="sk-lines">
+          <div class="sk-line" style="width:38%"></div>
+          <div class="sk-line" style="width:62%"></div>
+          <div class="sk-line"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ MAIN CHAT ══ -->
+  <div class="main-chat">
+
+    <!-- ══ TOPBAR — ENHANCED FOR IMPORTANCE ══ -->
+    <div class="chat-topbar">
+      <div class="avatar av-orange" style="width:38px;height:38px;border-radius:9px;font-size:14px">JD<span class="online-dot" style="width:10px;height:10px;border-width:2px"></span></div>
+      <div class="topbar-info">
+        <div class="topbar-name">
+          <span style="font-size:17px;font-weight:680;color:#1A1A1A;letter-spacing:-0.02em">John Decker</span>
+          <span class="mlabel priority" style="font-size:10px;font-weight:700;padding:2px 9px;border-radius:5px;background:#FEF2F2;color:#DC2626;text-transform:uppercase;letter-spacing:0.05em">Priority</span>
+        </div>
+        <div class="topbar-meta" style="margin-top:2px">
+          <span class="online" style="color:#16A34A;font-weight:600;font-size:12px">● Online</span>
+          <span class="sep" style="color:#E0E0E0;font-size:10px">·</span>
+          <span style="font-size:12px;font-weight:470;color:#888">johndecker</span>
+          <span class="sep" style="color:#E0E0E0;font-size:10px">·</span>
+          <span style="font-size:12px;font-weight:600;color:#DC2626">3 unread</span>
+          <span class="sep" style="color:#E0E0E0;font-size:10px">·</span>
+          <span class="mlabel vip" style="font-size:9px;font-weight:700;padding:1px 8px;border-radius:4px;background:#1A1A1A;color:#FFF;text-transform:uppercase;letter-spacing:0.05em">VIP</span>
+        </div>
+      </div>
+      <div class="topbar-actions">
+        <button title="Search">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        </button>
+        <button title="Mark read">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+        </button>
+        <button title="More">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="5" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="12" cy="19" r="1"/></svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- ══ PRODUCT BAR — BOLDER, MORE PROMINENT ══ -->
+    <div class="product-bar" style="padding:10px 20px;background:#FAFAF8;border-bottom:1px solid #E8E7E4">
+      <div class="product-bar-img" style="width:34px;height:34px;border-radius:8px;background:#EDEDED">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+      </div>
+      <div class="product-bar-info">
+        <div class="product-bar-name" style="font-size:13px;font-weight:580;color:#37352F">Toyota Harrier 2021 · Premium White</div>
+        <div class="product-bar-id" style="font-size:11px;color:#888;margin-top:1px;font-weight:470">P-1042 · JTDKB22U360123456</div>
+      </div>
+      <div class="product-bar-tags" style="gap:5px">
+        <span class="pbadge available" style="font-size:9.5px;font-weight:650;padding:2px 9px;border-radius:5px">Available</span>
+        <span class="pbadge inspection" style="font-size:9.5px;font-weight:650;padding:2px 9px;border-radius:5px">Inspection</span>
+      </div>
+      <div class="product-bar-price" style="font-size:16px;font-weight:700;color:#1A1A1A;background:#F5F5F3;padding:4px 12px;border-radius:6px">$118,000</div>
+    </div>
+
+    <!-- Messages -->
+    <div class="messages-area">
+      <div class="date-label"><span>Today</span></div>
+
+      <div class="msg incoming" style="animation-delay: .04s">
+        <div class="avatar av-orange avatar-xs">JD</div>
+        <div class="msg-body">
+          <div class="msg-bubble">Hi, I'm interested in the Toyota Harrier. Can you share more details about the condition and service history?</div>
+          <div class="msg-time">9:15 AM</div>
+        </div>
+      </div>
+
+      <div class="msg outgoing" style="animation-delay: .08s">
+        <div class="msg-body">
+          <div class="msg-bubble">Hi John! The 2021 Harrier Premium is in excellent condition with 35,000 km. Full service history from authorized dealer is available. Want me to email the spec sheet and inspection report?</div>
+          <div class="msg-time">9:18 AM</div>
+        </div>
+      </div>
+
+      <div class="msg incoming" style="animation-delay: .12s">
+        <div class="avatar av-orange avatar-xs">JD</div>
+        <div class="msg-body">
+          <div class="msg-bubble">Yes please! Also whats the asking price and is there any room for negotiation?</div>
+          <div class="msg-time">9:22 AM</div>
+        </div>
+      </div>
+
+      <div class="msg outgoing" style="animation-delay: .16s">
+        <div class="msg-body">
+          <div class="msg-bubble">Asking price is SGD 118,000. I can check with my manager on flexibility if you're ready to move quickly. Sending the documents now.</div>
+          <div class="msg-attachment">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+            Harrier_Spec_Sheet.pdf
+          </div>
+          <div class="msg-attachment">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+            Inspection_Report_P1042.pdf
+          </div>
+          <div class="msg-time">9:25 AM</div>
+        </div>
+      </div>
+
+      <div class="msg incoming" style="animation-delay: .2s">
+        <div class="avatar av-orange avatar-xs">JD</div>
+        <div class="msg-body">
+          <div class="msg-bubble">Received. Everything looks good — I'd like to proceed with the purchase. What are the next steps?</div>
+          <div class="msg-time">11:40 AM</div>
+        </div>
+      </div>
+
+      <div class="msg outgoing" style="animation-delay: .24s">
+        <div class="msg-body">
+          <div class="msg-bubble">Great! I'll prepare the sales agreement for e-signature and arrange a third-party inspection at our facility this week. Let me know your preferred date.</div>
+          <div class="msg-time">11:45 AM</div>
+        </div>
+      </div>
+
+      <div class="msg-divider"><span>3 unread</span></div>
+
+      <div class="msg incoming" style="animation-delay: .28s">
+        <div class="avatar av-orange avatar-xs">JD</div>
+        <div class="msg-body">
+          <div class="msg-bubble">Thanks for the update. When can I expect the shipping confirmation once payment is cleared?</div>
+          <div class="msg-time">2:34 PM</div>
+        </div>
+      </div>
+
+      <div class="msg outgoing" style="animation-delay: .32s">
+        <div class="msg-body">
+          <div class="msg-bubble">Shipping takes 2–3 business days after payment confirmation. I'll send tracking details as soon as the courier picks up. Fully insured during transit.</div>
+          <div class="msg-time">2:38 PM</div>
+        </div>
+      </div>
+
+      <div class="msg incoming" style="animation-delay: .36s">
+        <div class="avatar av-orange avatar-xs">JD</div>
+        <div class="msg-body">
+          <div class="msg-bubble">Please share the insurance certificate and bill of lading once available too. Thanks!</div>
+          <div class="msg-time">2:41 PM</div>
+        </div>
+      </div>
+
+      <div class="typing-indicator">
+        <div class="avatar av-orange avatar-xs">JD</div>
+        <div class="typing-dots"><span></span><span></span><span></span></div>
+      </div>
+    </div>
+
+    <!-- Input -->
+    <div class="input-area">
+      <div class="input-row">
+        <div class="input-wrap">
+          <div class="input-actions">
+            <button title="Attach">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>
+            </button>
+            <button title="Emoji">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg>
+            </button>
+          </div>
+          <textarea placeholder="Type a message…" rows="1"></textarea>
+        </div>
+        <button class="send-btn">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ RIGHT PANEL ══ -->
+  <div class="right-panel">
+    <div class="right-head">
+      <span>Details</span>
+      <button title="Close panel">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+
+    <div class="right-body">
+      <div class="customer-card">
+        <div class="avatar av-orange avatar-sm">JD</div>
+        <div class="customer-card-info">
+          <div class="customer-card-name">John Decker</div>
+          <div class="customer-card-username">@johndecker</div>
+          <div class="customer-card-tags">
+            <span class="tag-label hot">Hot Lead</span>
+            <span class="tag-label new">Follow Up</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="detail-section">
+        <div class="detail-section-title">Conversation</div>
+        <div class="detail-row">
+          <span class="detail-label">Status</span>
+          <span class="status-lozenge unread"><span class="dot"></span>Unread</span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-label">Messages</span>
+          <span class="detail-value">24</span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-label">Last active</span>
+          <span class="detail-value">2:41 PM</span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-label">Priority</span>
+          <span class="tag-label hot">High</span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-label">Assigned</span>
+          <span class="detail-value">You</span>
+        </div>
+      </div>
+
+      <div class="detail-divider"></div>
+
+      <div class="detail-section">
+        <div class="detail-section-title">Product</div>
+        <div class="detail-row">
+          <span class="detail-label">Name</span>
+          <span class="detail-value">Toyota Harrier 2021</span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-label">ID</span>
+          <span class="detail-value">P-1042</span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-label">Chassis</span>
+          <span class="detail-value">JTDKB22U36…</span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-label">Status</span>
+          <span class="pbadge available">Available</span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-label">Price</span>
+          <span class="detail-value" style="font-weight:600">$118,000</span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-label">Stage</span>
+          <span class="pbadge shipping">Shipping</span>
+        </div>
+      </div>
+
+      <div class="detail-divider"></div>
+
+      <div class="detail-section">
+        <div class="detail-section-title">Actions</div>
+        <button class="quick-action-btn">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+          Send email
+        </button>
+        <button class="quick-action-btn">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+          View product
+        </button>
+        <button class="quick-action-btn">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          Mark resolved
+        </button>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+</body>
+</html>
