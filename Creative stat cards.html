@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Stat Card Studies</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --aws-navy:#232f3e; --aws-orange:#ff9900; --aws-orange-dark:#e88a00;
+    --nx-red:#e50914; --nx-black:#141414; --nx-gray:#564d4d;
+    --atl-blue:#0052cc; --atl-purple:#6554c0; --atl-green:#36b37e; --atl-navy:#172b4d;
+    --ntn-ink:#191919; --ntn-gray:#787774; --ntn-line:#e9e9e7;
+    --stripe-purple:#635bff; --stripe-ink:#0a2540; --stripe-mint:#00d4a5;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0; padding:64px 24px; background:#ffffff;
+    font-family:'Inter',sans-serif;
+    display:flex; flex-direction:column; align-items:center; gap:56px;
+  }
+  .row-label{
+    font-family:'JetBrains Mono',monospace; font-size:11px; letter-spacing:.12em;
+    text-transform:uppercase; color:#9a9a9a; margin-bottom:-32px; align-self:flex-start;
+    max-width:1080px; width:100%; margin-left:calc(50% - 540px + 24px);
+  }
+  .wrap{max-width:1080px; width:100%; display:flex; justify-content:center;}
+
+  /* ============ AWS ============ */
+  .aws-card{
+    width:380px; border-radius:6px; overflow:hidden;
+    border:1px solid #d5dbe0; box-shadow:0 1px 3px rgba(0,0,0,.06);
+    font-family:'Inter',sans-serif;
+  }
+  .aws-top{background:var(--aws-navy); padding:18px 22px; display:flex; align-items:center; justify-content:space-between;}
+  .aws-top .brand{color:#fff; font-weight:700; font-size:14px; letter-spacing:.02em;}
+  .aws-top .badge{background:var(--aws-orange); color:var(--aws-navy); font-size:10px; font-weight:700; padding:3px 8px; border-radius:3px; letter-spacing:.04em;}
+  .aws-body{background:#fff; padding:26px 22px 22px;}
+  .aws-metric-label{font-size:12px; color:#5a6b7b; font-weight:500; margin-bottom:6px;}
+  .aws-metric{font-size:38px; font-weight:800; color:var(--aws-navy); line-height:1; font-variant-numeric:tabular-nums;}
+  .aws-metric span{font-size:18px; color:var(--aws-orange-dark); font-weight:700;}
+  .aws-sub{display:flex; align-items:center; gap:6px; margin-top:10px; font-size:12px; color:#1a7a3c; font-weight:600;}
+  .aws-bars{display:flex; align-items:flex-end; gap:5px; height:44px; margin-top:20px;}
+  .aws-bar{flex:1; background:linear-gradient(to top, var(--aws-orange), #ffc266); border-radius:2px 2px 0 0; transition:transform .25s ease;}
+  .aws-bar:hover{transform:scaleY(1.08);}
+  .aws-foot{display:flex; justify-content:space-between; margin-top:14px; padding-top:14px; border-top:1px dashed #e2e8ee; font-size:11px; color:#8b98a5; font-family:'JetBrains Mono',monospace;}
+
+  /* ============ NETFLIX ============ */
+  .nx-card{
+    width:380px; border-radius:4px; overflow:hidden; background:#fff;
+    border:1px solid #ece9e9; box-shadow:0 1px 3px rgba(0,0,0,.05);
+  }
+  .nx-top{padding:20px 22px 0;}
+  .nx-brand{color:var(--nx-red); font-weight:800; font-size:20px; letter-spacing:-.02em; font-family:'Inter',sans-serif;}
+  .nx-title{color:var(--nx-black); font-size:13px; font-weight:600; margin-top:14px;}
+  .nx-desc{color:#767070; font-size:12px; margin-top:3px;}
+  .nx-thumbs{display:flex; gap:8px; padding:18px 22px; overflow:hidden;}
+  .nx-thumb{
+    flex:1; aspect-ratio:2/3; border-radius:4px; position:relative; overflow:hidden;
+    display:flex; align-items:flex-end; padding:8px; cursor:pointer;
+    transition:transform .3s cubic-bezier(.2,.8,.2,1), box-shadow .3s ease;
+  }
+  .nx-thumb:hover{transform:scale(1.08) translateY(-4px); box-shadow:0 10px 20px rgba(0,0,0,.25); z-index:2;}
+  .nx-thumb span{color:#fff; font-size:20px; font-weight:800; text-shadow:0 2px 6px rgba(0,0,0,.5);}
+  .nx-thumb.t1{background:linear-gradient(145deg,#e50914,#7a0209);}
+  .nx-thumb.t2{background:linear-gradient(145deg,#3a3a3a,#141414);}
+  .nx-thumb.t3{background:linear-gradient(145deg,#b8860b,#4d3a06);}
+  .nx-thumb.t4{background:linear-gradient(145deg,#5b2a86,#20102e);}
+  .nx-stats{padding:4px 22px 20px; display:flex; justify-content:space-between;}
+  .nx-stat b{display:block; font-size:20px; color:var(--nx-black); font-weight:800;}
+  .nx-stat small{font-size:10px; color:#9a9a9a; text-transform:uppercase; letter-spacing:.06em;}
+
+  /* ============ ATLASSIAN ============ */
+  .atl-card{
+    width:380px; border-radius:8px; background:#fff; overflow:hidden;
+    border:1px solid #e3e6ec; box-shadow:0 2px 6px rgba(9,30,66,.06);
+    font-family:'Inter',sans-serif;
+  }
+  .atl-head{padding:20px 22px 0; display:flex; align-items:center; gap:10px;}
+  .atl-logo{width:22px; height:22px; border-radius:5px; background:linear-gradient(135deg, var(--atl-blue), var(--atl-purple)); flex-shrink:0;}
+  .atl-head b{font-size:13px; color:var(--atl-navy); font-weight:700;}
+  .atl-body{padding:16px 22px 20px;}
+  .atl-row{display:flex; align-items:center; gap:12px; padding:11px 0; border-bottom:1px solid #f1f3f7;}
+  .atl-row:last-child{border-bottom:none;}
+  .atl-icon{width:28px; height:28px; border-radius:6px; display:flex; align-items:center; justify-content:center; font-size:13px; font-weight:700; color:#fff; flex-shrink:0;}
+  .atl-icon.todo{background:#dfe1e6; color:#42526e;}
+  .atl-icon.prog{background:var(--atl-blue);}
+  .atl-icon.done{background:var(--atl-green);}
+  .atl-row-text{flex:1;}
+  .atl-row-title{font-size:12.5px; color:var(--atl-navy); font-weight:600;}
+  .atl-row-sub{font-size:11px; color:#7a869a; margin-top:1px;}
+  .atl-count{font-size:16px; font-weight:800; color:var(--atl-navy); font-variant-numeric:tabular-nums;}
+  .atl-progress{height:6px; border-radius:4px; background:#eef0f4; margin-top:16px; overflow:hidden; display:flex;}
+  .atl-progress div{height:100%;}
+
+  /* ============ NOTION ============ */
+  .ntn-card{
+    width:380px; border-radius:10px; background:#fff; overflow:hidden;
+    border:1px solid var(--ntn-line); box-shadow:0 1px 2px rgba(0,0,0,.04);
+    font-family:'Inter',sans-serif;
+  }
+  .ntn-head{padding:20px 22px 12px; display:flex; align-items:center; gap:10px;}
+  .ntn-emoji{font-size:20px;}
+  .ntn-head b{font-size:14px; color:var(--ntn-ink); font-weight:700;}
+  .ntn-head small{display:block; font-size:11px; color:var(--ntn-gray); margin-top:1px;}
+  .ntn-divider{height:1px; background:var(--ntn-line); margin:0 22px;}
+  .ntn-table{padding:10px 22px 6px;}
+  .ntn-trow{display:grid; grid-template-columns:1fr 70px 90px; align-items:center; padding:9px 0; font-size:12.5px; border-bottom:1px solid #f4f4f2;}
+  .ntn-trow:first-child{color:var(--ntn-gray); font-size:10.5px; text-transform:uppercase; letter-spacing:.04em; font-weight:600;}
+  .ntn-trow.h{border-bottom:1px solid var(--ntn-line);}
+  .ntn-tag{display:inline-block; padding:2px 8px; border-radius:4px; font-size:11px; font-weight:600;}
+  .ntn-tag.blue{background:#e7f3f8; color:#0b6e99;}
+  .ntn-tag.green{background:#ddedea; color:#448361;}
+  .ntn-tag.orange{background:#faebdd; color:#d9730d;}
+  .ntn-name{color:var(--ntn-ink); font-weight:500; display:flex; align-items:center; gap:6px;}
+  .ntn-dot{width:6px; height:6px; border-radius:50%; flex-shrink:0;}
+  .ntn-foot{padding:12px 22px 18px; font-size:11px; color:var(--ntn-gray); display:flex; align-items:center; gap:6px;}
+
+  /* ============ STRIPE ============ */
+  .stripe-card{
+    width:380px; border-radius:12px; background:#fff; overflow:hidden;
+    border:1px solid #e6e6f5; box-shadow:0 4px 16px rgba(99,91,255,.08);
+    font-family:'Inter',sans-serif; position:relative;
+  }
+  .stripe-glow{position:absolute; top:-60px; right:-60px; width:180px; height:180px; border-radius:50%;
+    background:radial-gradient(circle, rgba(99,91,255,.18), transparent 70%); pointer-events:none;}
+  .stripe-top{padding:22px 24px 0; display:flex; justify-content:space-between; align-items:flex-start; position:relative;}
+  .stripe-label{font-size:12px; color:#6b7280; font-weight:500;}
+  .stripe-badge{background:#e9e8ff; color:var(--stripe-purple); font-size:11px; font-weight:700; padding:3px 9px; border-radius:20px;}
+  .stripe-amount{font-size:34px; font-weight:700; color:var(--stripe-ink); padding:8px 24px 0; letter-spacing:-.01em;}
+  .stripe-delta{color:var(--stripe-mint); font-size:13px; font-weight:600; padding:2px 24px 0;}
+  .stripe-chart{padding:18px 24px 8px; position:relative;}
+  .stripe-chart svg{width:100%; height:64px; display:block;}
+  .stripe-grid{display:grid; grid-template-columns:1fr 1fr; gap:12px; padding:12px 24px 22px; border-top:1px solid #f1f0fb; margin-top:4px;}
+  .stripe-mini b{display:block; font-size:16px; color:var(--stripe-ink); font-weight:700;}
+  .stripe-mini span{font-size:11px; color:#9094a6;}
+</style>
+</head>
+<body>
+
+<div class="row-label">01 — AWS · console density, data-forward</div>
+<div class="wrap">
+  <div class="aws-card">
+    <div class="aws-top">
+      <div class="brand">CloudWatch Metrics</div>
+      <div class="badge">LIVE</div>
+    </div>
+    <div class="aws-body">
+      <div class="aws-metric-label">EC2 Requests / min</div>
+      <div class="aws-metric">248,<span>930</span></div>
+      <div class="aws-sub">▲ 12.4% vs last hour</div>
+      <div class="aws-bars" id="awsBars"></div>
+      <div class="aws-foot"><span>us-east-1</span><span>updated 4s ago</span></div>
+    </div>
+  </div>
+</div>
+
+<div class="row-label">02 — Netflix · dark thumbnails on a light shell</div>
+<div class="wrap">
+  <div class="nx-card">
+    <div class="nx-top">
+      <div class="nx-brand">NETFLIX</div>
+      <div class="nx-title">Top 4 in your region today</div>
+      <div class="nx-desc">Ranked by hours watched, last 24h</div>
+    </div>
+    <div class="nx-thumbs">
+      <div class="nx-thumb t1"><span>1</span></div>
+      <div class="nx-thumb t2"><span>2</span></div>
+      <div class="nx-thumb t3"><span>3</span></div>
+      <div class="nx-thumb t4"><span>4</span></div>
+    </div>
+    <div class="nx-stats">
+      <div class="nx-stat"><b>82.4M</b><small>Hours watched</small></div>
+      <div class="nx-stat"><b>190</b><small>Countries</small></div>
+      <div class="nx-stat"><b>#1</b><small>Global rank</small></div>
+    </div>
+  </div>
+</div>
+
+<div class="row-label">03 — Atlassian · Jira-style board summary</div>
+<div class="wrap">
+  <div class="atl-card">
+    <div class="atl-head">
+      <div class="atl-logo"></div>
+      <b>Sprint 24 — Board Summary</b>
+    </div>
+    <div class="atl-body">
+      <div class="atl-row">
+        <div class="atl-icon todo">▤</div>
+        <div class="atl-row-text">
+          <div class="atl-row-title">To do</div>
+          <div class="atl-row-sub">Not yet started</div>
+        </div>
+        <div class="atl-count">18</div>
+      </div>
+      <div class="atl-row">
+        <div class="atl-icon prog">↻</div>
+        <div class="atl-row-text">
+          <div class="atl-row-title">In progress</div>
+          <div class="atl-row-sub">Being worked on</div>
+        </div>
+        <div class="atl-count">9</div>
+      </div>
+      <div class="atl-row">
+        <div class="atl-icon done">✓</div>
+        <div class="atl-row-text">
+          <div class="atl-row-title">Done</div>
+          <div class="atl-row-sub">Shipped this sprint</div>
+        </div>
+        <div class="atl-count">34</div>
+      </div>
+      <div class="atl-progress">
+        <div style="width:30%; background:#dfe1e6;"></div>
+        <div style="width:15%; background:var(--atl-blue);"></div>
+        <div style="width:55%; background:var(--atl-green);"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="row-label">04 — Notion · database table, quiet and structured</div>
+<div class="wrap">
+  <div class="ntn-card">
+    <div class="ntn-head">
+      <div class="ntn-emoji">📊</div>
+      <div>
+        <b>Content Calendar</b>
+        <small>12 pages · updated 2m ago</small>
+      </div>
+    </div>
+    <div class="ntn-divider"></div>
+    <div class="ntn-table">
+      <div class="ntn-trow h"><span>Page</span><span>Status</span><span>Owner</span></div>
+      <div class="ntn-trow"><span class="ntn-name"><span class="ntn-dot" style="background:#0b6e99"></span>Launch blog post</span><span class="ntn-tag blue">In review</span><span>Mia</span></div>
+      <div class="ntn-trow"><span class="ntn-name"><span class="ntn-dot" style="background:#448361"></span>Q3 changelog</span><span class="ntn-tag green">Published</span><span>Théo</span></div>
+      <div class="ntn-trow"><span class="ntn-name"><span class="ntn-dot" style="background:#d9730d"></span>Customer story</span><span class="ntn-tag orange">Drafting</span><span>Aya</span></div>
+    </div>
+    <div class="ntn-foot">＋ New page</div>
+  </div>
+</div>
+
+<div class="row-label">05 — Stripe · payments dashboard, soft gradient accent</div>
+<div class="wrap">
+  <div class="stripe-card">
+    <div class="stripe-glow"></div>
+    <div class="stripe-top">
+      <div class="stripe-label">Net volume</div>
+      <div class="stripe-badge">USD</div>
+    </div>
+    <div class="stripe-amount">$84,203.12</div>
+    <div class="stripe-delta">▲ 18.2% vs last 7 days</div>
+    <div class="stripe-chart">
+      <svg viewBox="0 0 320 64" preserveAspectRatio="none">
+        <defs>
+          <linearGradient id="sg" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#635bff" stop-opacity="0.35"/>
+            <stop offset="100%" stop-color="#635bff" stop-opacity="0"/>
+          </linearGradient>
+        </defs>
+        <path d="M0,48 L27,42 L54,46 L81,30 L108,34 L135,20 L162,26 L189,14 L216,18 L243,8 L270,16 L297,6 L320,10 L320,64 L0,64 Z" fill="url(#sg)"/>
+        <path d="M0,48 L27,42 L54,46 L81,30 L108,34 L135,20 L162,26 L189,14 L216,18 L243,8 L270,16 L297,6 L320,10" fill="none" stroke="#635bff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </div>
+    <div class="stripe-grid">
+      <div class="stripe-mini"><b>1,204</b><span>Successful payments</span></div>
+      <div class="stripe-mini"><b>99.2%</b><span>Success rate</span></div>
+    </div>
+  </div>
+</div>
+
+<script>
+  const heights = [40,55,30,70,45,60,35,80,50,65,42,58];
+  const bars = document.getElementById('awsBars');
+  heights.forEach(h=>{
+    const d = document.createElement('div');
+    d.className='aws-bar';
+    d.style.height = h+'%';
+    bars.appendChild(d);
+  });
+</script>
+
+</body>
+</html>
