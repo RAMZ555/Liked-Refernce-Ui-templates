@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Server Unavailable</title>
+<style>
+  /* ── Reset ── */
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Amazon Ember', 'Inter', 'Helvetica Neue', Roboto, Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ── White screen + centered modal (AWS console style) ── */
+  .screen {
+    position: fixed;
+    inset: 0;
+    background: #ffffff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .settings-modal__box {
+    position: relative;
+    width: 560px;
+    max-width: calc(100vw - 32px);
+    max-height: calc(100vh - 48px);
+    display: flex;
+    flex-direction: column;
+    background: #ffffff;
+    border: 1px solid #d5dbdb;
+    border-radius: 8px;
+    box-shadow:
+      0 0 0 1px rgba(0, 0, 0, 0.02),
+      0 24px 56px -10px rgba(35, 47, 62, 0.28);
+    animation: settingsModalIn 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+    overflow: hidden;
+  }
+
+  /* ── Topbar ── */
+  .settings-modal__topbar {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 16px;
+    background: #232f3e;
+    border-bottom: 1px solid #1b2531;
+  }
+
+  .settings-modal__topbar-badge {
+    flex: 0 0 auto;
+    width: 24px;
+    height: 24px;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #ff9900;
+  }
+
+  .settings-modal__topbar-title {
+    flex: 1;
+    font-size: 14px;
+    font-weight: 700;
+    color: #ffffff;
+    letter-spacing: 0.01em;
+  }
+
+  /* ── Body ── */
+  .settings-modal__body {
+    padding: 20px 24px 0;
+    overflow-y: auto;
+  }
+
+  .settings-modal__sub {
+    font-size: 13px;
+    font-weight: 500;
+    color: #545b64;
+    margin: 0 0 18px;
+    line-height: 1.6;
+  }
+
+  /* ── Status row ── */
+  .settings-modal__toggle-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 20px;
+    padding: 12px 14px;
+    background: #fbfbfa;
+    border: 1px solid #d5dbdb;
+    border-radius: 4px;
+  }
+
+  .settings-modal__toggle-label {
+    font-size: 13px;
+    font-weight: 700;
+    color: #16191f;
+  }
+
+  .settings-modal__toggle-desc {
+    font-size: 12px;
+    color: #687078;
+    margin-top: 2px;
+  }
+
+  .status-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 700;
+    background: #fdf3f1;
+    color: #a31400;
+    border: 1px solid #d13212;
+  }
+
+  .status-pill__dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #d13212;
+    flex: 0 0 auto;
+  }
+
+  .status-pill--checking {
+    background: #fff9f0;
+    color: #5f3a05;
+    border: 1px solid #ff9900;
+  }
+
+  /* ── Error banner (day-of-week message) ── */
+  .settings-modal__error {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 14px;
+    margin-bottom: 16px;
+    background: #fdf3f1;
+    border: 1px solid #d5dbdb;
+    border-left: 4px solid #d13212;
+    border-radius: 3px;
+    font-size: 12.5px;
+    color: #a31400;
+    font-weight: 500;
+    line-height: 1.55;
+  }
+
+  /* ── Footer ── */
+  .settings-modal__footer {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 14px 24px;
+    background: #fafafa;
+    border-top: 1px solid #d5dbdb;
+  }
+
+  .settings-modal__spacer { flex: 1; }
+
+  .settings-modal__btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 8px 18px;
+    border-radius: 3px;
+    font-size: 13px;
+    font-weight: 700;
+    font-family: inherit;
+    border: 1px solid transparent;
+    cursor: pointer;
+    transition: background 0.15s ease, border-color 0.15s ease, transform 0.1s ease;
+  }
+
+  .settings-modal__btn:active { transform: translateY(1px); }
+
+  .settings-modal__btn--primary {
+    background: #ff9900;
+    border-color: #ec8b00;
+    color: #16191f;
+  }
+
+  .settings-modal__btn--primary:hover { background: #ec8b00; }
+
+  .settings-modal__btn--secondary {
+    background: #ffffff;
+    border-color: #c4c7c7;
+    color: #16191f;
+  }
+
+  .settings-modal__btn--secondary:hover {
+    background: #f8f8f8;
+    border-color: #aab7b8;
+  }
+
+  @keyframes settingsModalIn {
+    from { opacity: 0; transform: scale(0.97) translateY(6px); }
+    to   { opacity: 1; transform: scale(1) translateY(0); }
+  }
+</style>
+</head>
+<body>
+
+<div class="screen">
+  <div class="settings-modal__box" role="dialog" aria-modal="true" aria-label="Server availability">
+
+    <!-- Topbar -->
+    <div class="settings-modal__topbar">
+      <span class="settings-modal__topbar-badge">
+        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#232F3E" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="2" y="2" width="20" height="8" rx="2" ry="2"></rect>
+          <rect x="2" y="14" width="20" height="8" rx="2" ry="2"></rect>
+          <line x1="6" y1="6" x2="6.01" y2="6"></line>
+          <line x1="6" y1="18" x2="6.01" y2="18"></line>
+        </svg>
+      </span>
+      <span class="settings-modal__topbar-title">Server Unavailable</span>
+    </div>
+
+    <!-- Body -->
+    <div class="settings-modal__body">
+      <p class="settings-modal__sub">
+        We could not reach the application server. The portal will restore
+        automatically the moment the server is back online.
+      </p>
+
+      <!-- Status row -->
+      <div class="settings-modal__toggle-row">
+        <div>
+          <div class="settings-modal__toggle-label">Server Status</div>
+          <div class="settings-modal__toggle-desc">The server did not respond to the latest health check.</div>
+        </div>
+        <span class="status-pill">
+          <span class="status-pill__dot"></span>
+          Offline
+        </span>
+      </div>
+
+      <!-- Day-of-week message (hardcoded sample) -->
+      <div class="settings-modal__error">
+        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"></path>
+          <line x1="12" y1="9" x2="12" y2="13"></line>
+          <line x1="12" y1="17" x2="12.01" y2="17"></line>
+        </svg>
+        <span style="flex:1">Server will be available Monday morning.</span>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="settings-modal__footer">
+      <div class="settings-modal__spacer"></div>
+      <button type="button" class="settings-modal__btn settings-modal__btn--secondary">
+        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"></path>
+          <path d="M21 3v5h-5"></path>
+          <path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"></path>
+          <path d="M3 21v-5h5"></path>
+        </svg>
+        Refresh Page
+      </button>
+      <button type="button" class="settings-modal__btn settings-modal__btn--primary">
+        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"></path>
+          <path d="M21 3v5h-5"></path>
+          <path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"></path>
+          <path d="M3 21v-5h5"></path>
+        </svg>
+        Try Again
+      </button>
+    </div>
+
+  </div>
+</div>
+
+</body>
+</html>

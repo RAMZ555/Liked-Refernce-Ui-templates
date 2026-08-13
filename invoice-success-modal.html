@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Invoice Save - Success &amp; Error Modal</title>
+<style>
+  body {
+    margin: 0;
+    min-height: 100vh;
+    padding: 32px 20px 60px;
+    box-sizing: border-box;
+    font-family: 'Amazon Ember', 'Inter', 'Helvetica Neue', Roboto, Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    background: #f0f2f7;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 40px;
+  }
+
+  .combo-label {
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: #545b64;
+    text-align: center;
+    margin-bottom: 12px;
+  }
+
+  .invoice-modal {
+    width: 360px;
+    max-width: calc(100vw - 32px);
+    background: #ffffff;
+    border-radius: 6px;
+    box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.02), 0 18px 44px -12px rgba(26, 50, 114, 0.3);
+    overflow: hidden;
+  }
+
+  .invoice-modal__topbar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 14px;
+    background: linear-gradient(180deg, #1a3272, #0e1f4a 90%);
+    border-bottom: 1px solid #0a1736;
+  }
+  .invoice-modal__topbar--error { background: linear-gradient(180deg, #a8071a, #820514); border-bottom-color: #6e0411; }
+  .invoice-modal__topbar-title {
+    font-size: 13px;
+    font-weight: 700;
+    color: #ffffff;
+    letter-spacing: 0.01em;
+  }
+  .invoice-modal__close {
+    margin-left: auto;
+    width: 24px;
+    height: 24px;
+    border: none;
+    background: transparent;
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 16px;
+    line-height: 1;
+    cursor: pointer;
+    border-radius: 4px;
+  }
+  .invoice-modal__close:hover { background: rgba(255, 255, 255, 0.12); color: #ffffff; }
+
+  .invoice-modal__body { padding: 18px 20px 0; }
+  .invoice-modal__sub {
+    font-size: 12.5px;
+    font-weight: 500;
+    color: #6b778c;
+    margin: 0 0 14px;
+    line-height: 1.5;
+    text-align: center;
+  }
+  .invoice-modal__sub strong { color: #172b4d; font-weight: 700; }
+
+  .invoice-modal__badge-wrap {
+    margin: 0 auto 14px;
+    display: flex;
+    justify-content: center;
+  }
+  .invoice-modal__badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 5px 14px;
+    border-radius: 3px;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    background: #e6ecfb;
+    color: #12254f;
+    border: 1px solid #b9c8ee;
+  }
+  .invoice-modal__badge--error { background: #fdeaea; color: #a8071a; border-color: #f5c2c2; }
+
+  .invoice-modal__card {
+    background: #ffffff;
+    border: 1px solid #e5e7ee;
+    border-radius: 4px;
+    box-shadow: 0 1px 1px rgba(9, 30, 66, 0.12), 0 4px 16px -4px rgba(9, 30, 66, 0.18);
+    padding: 4px 14px;
+    margin-bottom: 16px;
+  }
+  .invoice-modal__row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 7px 0;
+  }
+  .invoice-modal__row + .invoice-modal__row { border-top: 1px solid #eef2f6; }
+  .invoice-modal__row-label { font-size: 12px; font-weight: 500; color: #6b778c; }
+  .invoice-modal__row-value { font-size: 12.5px; font-weight: 600; color: #172b4d; text-align: right; }
+  .invoice-modal__row-value--red { color: #d13212; font-weight: 700; }
+
+  .invoice-modal__total-band {
+    margin: 0 -14px -4px;
+    padding: 10px 14px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: #fafbff;
+    border-top: 1px solid #e5e7ee;
+  }
+  .invoice-modal__total-label { font-size: 12px; font-weight: 700; color: #6b778c; }
+  .invoice-modal__total-value { font-size: 14px; font-weight: 800; color: #0d7a4a; }
+
+  .invoice-modal__error {
+    background: #fdf3f1;
+    border: 1px solid #e5e7ee;
+    border-left: 4px solid #d13212;
+    border-radius: 4px;
+    padding: 12px 14px;
+    margin-bottom: 16px;
+  }
+  .invoice-modal__error-msg { font-size: 12.5px; font-weight: 500; color: #a31400; line-height: 1.5; }
+  .invoice-modal__error-code { font-size: 11px; font-weight: 500; color: #7a869a; margin-top: 6px; }
+
+  .invoice-modal__footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    padding: 12px 20px;
+    background: #fafafa;
+    border-top: 1px solid #e9ebeb;
+  }
+  .invoice-modal__btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 6px 16px;
+    border-radius: 4px;
+    font-size: 12.5px;
+    font-weight: 600;
+    font-family: inherit;
+    border: 1px solid transparent;
+    cursor: pointer;
+    transition: background 0.15s ease, border-color 0.15s ease, transform 0.1s ease;
+  }
+  .invoice-modal__btn--secondary { background: #ffffff; border-color: #879596; color: #16191f; }
+  .invoice-modal__btn--secondary:hover { background: #f2f3f3; border-color: #aab7b8; }
+  .invoice-modal__btn--primary { background: #12254f; border-color: #12254f; color: #ffffff; }
+  .invoice-modal__btn--primary:hover { background: #0e1f4a; border-color: #0e1f4a; }
+  .invoice-modal__btn--error { background: #d13212; border-color: #b92500; color: #ffffff; }
+  .invoice-modal__btn--error:hover { background: #b92500; }
+  .invoice-modal__btn--primary:active, .invoice-modal__btn--secondary:active, .invoice-modal__btn--error:active { transform: translateY(1px); }
+</style>
+</head>
+<body>
+
+<!-- ══════════ SUCCESS STATE (FINAL) ══════════ -->
+<div style="display:flex;flex-direction:column;align-items:center;">
+  <div class="combo-label">Success — Final</div>
+  <div class="invoice-modal" role="dialog" aria-modal="true" aria-label="Invoice saved">
+    <div class="invoice-modal__topbar">
+      <span class="invoice-modal__topbar-title">Invoice Saved</span>
+      <button type="button" class="invoice-modal__close">&times;</button>
+    </div>
+    <div class="invoice-modal__body">
+      <p class="invoice-modal__sub">Invoice <strong>INV-2026-0142</strong> has been saved.</p>
+      <div class="invoice-modal__badge-wrap"><span class="invoice-modal__badge">INV-2026-0142</span></div>
+      <div class="invoice-modal__card">
+        <div class="invoice-modal__row"><span class="invoice-modal__row-label">Sold To</span><span class="invoice-modal__row-value">Globe Motors Pte Ltd</span></div>
+        <div class="invoice-modal__row"><span class="invoice-modal__row-label">Shipping To</span><span class="invoice-modal__row-value">Singapore</span></div>
+        <div class="invoice-modal__row"><span class="invoice-modal__row-label">Cars</span><span class="invoice-modal__row-value">3 items</span></div>
+        <div class="invoice-modal__row"><span class="invoice-modal__row-label">Finalized</span><span class="invoice-modal__row-value invoice-modal__row-value--red">Yes</span></div>
+        <div class="invoice-modal__total-band"><span class="invoice-modal__total-label">Total Amount</span><span class="invoice-modal__total-value">64,500.00</span></div>
+      </div>
+    </div>
+    <div class="invoice-modal__footer">
+      <button type="button" class="invoice-modal__btn invoice-modal__btn--secondary">View Invoices</button>
+      <button type="button" class="invoice-modal__btn invoice-modal__btn--primary">Done</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════ ERROR STATE (RED) ══════════ -->
+<div style="display:flex;flex-direction:column;align-items:center;">
+  <div class="combo-label">Error — Red</div>
+  <div class="invoice-modal" role="dialog" aria-modal="true" aria-label="Save failed">
+    <div class="invoice-modal__topbar invoice-modal__topbar--error">
+      <span class="invoice-modal__topbar-title">Save Failed</span>
+      <button type="button" class="invoice-modal__close">&times;</button>
+    </div>
+    <div class="invoice-modal__body">
+      <p class="invoice-modal__sub">We couldn't save your invoice. <strong>Please try again.</strong></p>
+      <div class="invoice-modal__badge-wrap"><span class="invoice-modal__badge invoice-modal__badge--error">INV-2026-0142</span></div>
+      <div class="invoice-modal__error">
+        <div class="invoice-modal__error-msg">Something went wrong while saving the invoice. Your changes were not saved.</div>
+        <div class="invoice-modal__error-code">Error code: SAVE_500</div>
+      </div>
+    </div>
+    <div class="invoice-modal__footer">
+      <button type="button" class="invoice-modal__btn invoice-modal__btn--secondary">Cancel</button>
+      <button type="button" class="invoice-modal__btn invoice-modal__btn--error">Retry</button>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

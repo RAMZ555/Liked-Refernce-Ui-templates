@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Account Locked — Alert Recipients</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Amazon Ember', 'Inter', 'Helvetica Neue', Roboto, Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ── Full-screen overlay ── */
+  .settings-modal {
+    position: fixed;
+    inset: 0;
+    z-index: 3000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .settings-modal__scrim {
+    position: absolute;
+    inset: 0;
+    background: rgba(35, 47, 62, 0.45);
+    animation: settingsFadeIn 0.2s ease-out;
+  }
+
+  .settings-modal__box {
+    position: relative;
+    width: 560px;
+    max-width: calc(100vw - 32px);
+    max-height: calc(100vh - 48px);
+    display: flex;
+    flex-direction: column;
+    background: #ffffff;
+    border: 1px solid #d5dbdb;
+    border-radius: 8px;
+    box-shadow:
+      0 0 0 1px rgba(0, 0, 0, 0.02),
+      0 24px 56px -10px rgba(35, 47, 62, 0.28);
+    animation: settingsModalIn 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+    overflow: hidden;
+  }
+
+  /* ── Topbar ── */
+  .settings-modal__topbar {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 16px;
+    background: #232f3e;
+    border-bottom: 1px solid #1b2531;
+  }
+
+  .settings-modal__topbar-badge {
+    flex: 0 0 auto;
+    width: 24px;
+    height: 24px;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #ff9900;
+  }
+
+  .settings-modal__topbar-title {
+    flex: 1;
+    font-size: 14px;
+    font-weight: 700;
+    color: #ffffff;
+    letter-spacing: 0.01em;
+  }
+
+  .settings-modal__close {
+    flex: 0 0 auto;
+    padding: 3px;
+    border: none;
+    background: transparent;
+    color: #aab7b8;
+    cursor: pointer;
+    border-radius: 3px;
+    display: flex;
+    transition: background 0.1s ease, color 0.1s ease;
+  }
+
+  .settings-modal__close:hover {
+    color: #ffffff;
+    background: rgba(255, 255, 255, 0.08);
+  }
+
+  /* ── Body ── */
+  .settings-modal__body {
+    padding: 20px 24px 0;
+    overflow-y: auto;
+  }
+
+  .settings-modal__sub {
+    font-size: 13px;
+    font-weight: 500;
+    color: #545b64;
+    margin: 0 0 18px;
+    line-height: 1.6;
+  }
+
+  /* ── Toggle row ── */
+  .settings-modal__toggle-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 20px;
+    padding: 12px 14px;
+    background: #fbfbfa;
+    border: 1px solid #d5dbdb;
+    border-radius: 4px;
+  }
+
+  .settings-modal__toggle-label {
+    font-size: 13px;
+    font-weight: 700;
+    color: #16191f;
+  }
+
+  .settings-modal__toggle-desc {
+    font-size: 12px;
+    color: #687078;
+    margin-top: 2px;
+  }
+
+  .settings-toggle {
+    position: relative;
+    flex: 0 0 auto;
+    width: 42px;
+    height: 24px;
+    cursor: pointer;
+    border: none;
+    background: transparent;
+    padding: 0;
+  }
+
+  .settings-toggle__track {
+    position: absolute;
+    inset: 0;
+    border-radius: 12px;
+    background: #5f6b7a;
+    transition: background 0.15s ease;
+  }
+
+  .settings-toggle__thumb {
+    position: absolute;
+    top: 3px;
+    left: 3px;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: #ffffff;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.25);
+    transition: left 0.15s ease;
+  }
+
+  .settings-toggle--on .settings-toggle__track { background: #ff9900; }
+  .settings-toggle--on .settings-toggle__thumb { left: 21px; }
+
+  /* ── Section ── */
+  .settings-modal__section-title {
+    font-size: 14px;
+    font-weight: 700;
+    color: #16191f;
+    margin: 0 0 4px;
+  }
+
+  .settings-modal__section-desc {
+    font-size: 12px;
+    color: #545b64;
+    margin: 0 0 12px;
+    line-height: 1.5;
+  }
+
+  /* ── Recipient list card ── */
+  .settings-modal__card {
+    background: #fbfbfa;
+    border: 1px solid #d5dbdb;
+    border-radius: 3px;
+    margin-bottom: 14px;
+  }
+
+  .settings-modal__row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 7px 14px;
+  }
+
+  .settings-modal__row + .settings-modal__row { border-top: 1px solid #e9ebeb; }
+
+  .settings-modal__row-value {
+    flex: 1;
+    font-size: 13px;
+    font-weight: 600;
+    color: #232f3e;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .settings-modal__remove {
+    flex: 0 0 auto;
+    padding: 4px;
+    border: none;
+    background: transparent;
+    color: #879596;
+    cursor: pointer;
+    border-radius: 3px;
+    display: flex;
+    transition: color 0.1s ease, background 0.1s ease;
+  }
+
+  .settings-modal__remove:hover {
+    color: #d13212;
+    background: #fdf3f1;
+  }
+
+  /* ── Add row ── */
+  .settings-modal__add {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 16px;
+  }
+
+  .settings-modal__input {
+    flex: 1;
+    min-width: 0;
+    font-family: inherit;
+    font-size: 14px;
+    line-height: 1.5;
+    color: #16191f;
+    background: #ffffff;
+    border: 1px solid #879596;
+    border-radius: 3px;
+    padding: 7px 10px;
+    transition: border-color 0.1s ease, box-shadow 0.1s ease;
+  }
+
+  .settings-modal__input:focus {
+    outline: none;
+    border-color: #ec7211;
+    box-shadow: 0 0 0 2px rgba(255, 153, 0, 0.35);
+  }
+
+  .settings-modal__input::placeholder { color: #879596; }
+
+  /* ── Note / status boxes ── */
+  .settings-modal__note {
+    padding: 10px 14px;
+    margin-bottom: 16px;
+    background: #fff9f0;
+    border: 1px solid #f5d7ac;
+    border-left: 4px solid #ff9900;
+    border-radius: 3px;
+    font-size: 12.5px;
+    color: #5f3a05;
+    line-height: 1.55;
+  }
+
+  .settings-modal__note strong { font-weight: 700; color: #5f3a05; }
+
+  .settings-modal__note--neutral {
+    background: #f2f8f0;
+    border-color: #99dba3;
+    border-left-color: #1d8102;
+    color: #16191f;
+  }
+
+  .settings-modal__note--neutral strong { color: #16191f; }
+
+  /* ── Footer ── */
+  .settings-modal__footer {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 14px 24px;
+    background: #fafafa;
+    border-top: 1px solid #d5dbdb;
+  }
+
+  .settings-modal__spacer { flex: 1; }
+
+  .settings-modal__btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 8px 18px;
+    border-radius: 3px;
+    font-size: 13px;
+    font-weight: 700;
+    font-family: inherit;
+    border: 1px solid transparent;
+    cursor: pointer;
+    transition: background 0.15s ease, border-color 0.15s ease, transform 0.1s ease;
+  }
+
+  .settings-modal__btn:active { transform: translateY(1px); }
+
+  .settings-modal__btn--primary {
+    background: #ff9900;
+    border-color: #ec8b00;
+    color: #16191f;
+  }
+
+  .settings-modal__btn--primary:hover { background: #ec8b00; }
+
+  .settings-modal__btn--secondary {
+    background: #ffffff;
+    border-color: #c4c7c7;
+    color: #16191f;
+  }
+
+  .settings-modal__btn--secondary:hover {
+    background: #f8f8f8;
+    border-color: #aab7b8;
+  }
+
+  @keyframes settingsFadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+  @keyframes settingsModalIn {
+    from { opacity: 0; transform: scale(0.97) translateY(6px); }
+    to   { opacity: 1; transform: scale(1) translateY(0); }
+  }
+</style>
+</head>
+<body>
+
+<div class="settings-modal">
+  <div class="settings-modal__scrim"></div>
+
+  <div class="settings-modal__box" role="dialog" aria-modal="true" aria-label="Account Locked — Alert Recipients">
+
+    <!-- Topbar -->
+    <div class="settings-modal__topbar">
+      <span class="settings-modal__topbar-badge">
+        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#232F3E" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"></path>
+          <path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"></path>
+        </svg>
+      </span>
+      <span class="settings-modal__topbar-title">Account Locked — Alert Recipients</span>
+      <button type="button" class="settings-modal__close" aria-label="Close">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="18" y1="6" x2="6" y2="18"></line>
+          <line x1="6" y1="6" x2="18" y2="18"></line>
+        </svg>
+      </button>
+    </div>
+
+    <!-- Body -->
+    <div class="settings-modal__body">
+      <p class="settings-modal__sub">
+        Choose who receives an email every time an account is locked after 3 consecutive failed password attempts.
+      </p>
+
+      <!-- Alerts enabled toggle -->
+      <div class="settings-modal__toggle-row">
+        <div>
+          <div class="settings-modal__toggle-label">Alerts enabled</div>
+          <div class="settings-modal__toggle-desc">Emails are only sent when this is on.</div>
+        </div>
+        <button type="button" class="settings-toggle settings-toggle--on" role="switch" aria-checked="true" aria-label="Toggle alerts">
+          <span class="settings-toggle__track"></span>
+          <span class="settings-toggle__thumb"></span>
+        </button>
+      </div>
+
+      <!-- Recipient list -->
+      <div class="settings-modal__section-title">Recipient Emails</div>
+      <p class="settings-modal__section-desc">These addresses receive an email every time this alert fires.</p>
+
+      <div class="settings-modal__card">
+        <div class="settings-modal__row">
+          <span class="settings-modal__row-value" title="sg-sriram@lgcns.com">sg-sriram@lgcns.com</span>
+          <button type="button" class="settings-modal__remove" title="Remove" aria-label="Remove sg-sriram@lgcns.com">
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M3 6h18"></path>
+              <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path>
+              <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path>
+              <line x1="10" y1="11" x2="10" y2="17"></line>
+              <line x1="14" y1="11" x2="14" y2="17"></line>
+            </svg>
+          </button>
+        </div>
+        <div class="settings-modal__row">
+          <span class="settings-modal__row-value" title="sriramsubramaniyan555@gmail.com">sriramsubramaniyan555@gmail.com</span>
+          <button type="button" class="settings-modal__remove" title="Remove" aria-label="Remove sriramsubramaniyan555@gmail.com">
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M3 6h18"></path>
+              <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path>
+              <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path>
+              <line x1="10" y1="11" x2="10" y2="17"></line>
+              <line x1="14" y1="11" x2="14" y2="17"></line>
+            </svg>
+          </button>
+        </div>
+        <div class="settings-modal__row">
+          <span class="settings-modal__row-value" title="sri@gmail.com">sri@gmail.com</span>
+          <button type="button" class="settings-modal__remove" title="Remove" aria-label="Remove sri@gmail.com">
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M3 6h18"></path>
+              <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path>
+              <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path>
+              <line x1="10" y1="11" x2="10" y2="17"></line>
+              <line x1="14" y1="11" x2="14" y2="17"></line>
+            </svg>
+          </button>
+        </div>
+        <div class="settings-modal__row">
+          <span class="settings-modal__row-value" title="name@lgcnssg.com">name@lgcnssg.com</span>
+          <button type="button" class="settings-modal__remove" title="Remove" aria-label="Remove name@lgcnssg.com">
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M3 6h18"></path>
+              <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path>
+              <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path>
+              <line x1="10" y1="11" x2="10" y2="17"></line>
+              <line x1="14" y1="11" x2="14" y2="17"></line>
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- Add row -->
+      <div class="settings-modal__add">
+        <input class="settings-modal__input" placeholder="name@lgcnssg.com" value="" />
+        <button type="button" class="settings-modal__btn settings-modal__btn--add">
+          <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M5 12h14"></path>
+            <path d="M12 5v14"></path>
+          </svg>
+          Add
+        </button>
+      </div>
+
+      <!-- Status note (hardcoded sample) -->
+      <div class="settings-modal__note settings-modal__note--neutral">
+        <strong>3</strong> recipients will receive account-locked alert emails. Alerts are currently enabled.
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="settings-modal__footer">
+      <button type="button" class="settings-modal__btn settings-modal__btn--secondary">
+        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="m22 2-7 20-4-9-9-4Z"></path>
+          <path d="M22 2 11 13"></path>
+        </svg>
+        Send Test
+      </button>
+      <div class="settings-modal__spacer"></div>
+      <button type="button" class="settings-modal__btn settings-modal__btn--secondary">Cancel</button>
+      <button type="button" class="settings-modal__btn settings-modal__btn--primary">Save changes</button>
+    </div>
+
+  </div>
+</div>
+
+</body>
+</html>

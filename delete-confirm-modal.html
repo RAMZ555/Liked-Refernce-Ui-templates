@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Delete Invoice - Flow Modal</title>
+<style>
+  body {
+    margin: 0;
+    min-height: 100vh;
+    padding: 32px 20px 60px;
+    box-sizing: border-box;
+    font-family: 'Amazon Ember', 'Inter', 'Helvetica Neue', Roboto, Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    background: #f0f2f7;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .combo-label {
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: #545b64;
+    text-align: center;
+    margin-bottom: 12px;
+  }
+
+  .delete-modal {
+    width: 380px;
+    max-width: calc(100vw - 32px);
+    background: #ffffff;
+    border-radius: 6px;
+    box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.02), 0 18px 44px -12px rgba(26, 50, 114, 0.3);
+    overflow: hidden;
+  }
+
+  .delete-modal__topbar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 14px;
+    border-bottom: 1px solid;
+    transition: background 0.3s ease;
+  }
+  .delete-modal__topbar--confirm { background: linear-gradient(180deg, #a8071a, #820514 90%); border-bottom-color: #6e0411; }
+  .delete-modal__topbar--progress { background: linear-gradient(180deg, #0052cc, #0747a6 90%); border-bottom-color: #063b8e; }
+  .delete-modal__topbar--success { background: linear-gradient(180deg, #0d7a4a, #0a5c38 90%); border-bottom-color: #08482c; }
+
+  .delete-modal__title {
+    font-size: 13px;
+    font-weight: 700;
+    color: #ffffff;
+    letter-spacing: 0.01em;
+  }
+  .delete-modal__close {
+    margin-left: auto;
+    width: 24px;
+    height: 24px;
+    border: none;
+    background: transparent;
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 16px;
+    line-height: 1;
+    cursor: pointer;
+    border-radius: 4px;
+  }
+  .delete-modal__close:hover { background: rgba(255, 255, 255, 0.12); color: #ffffff; }
+
+  .delete-modal__body {
+    padding: 26px 20px 22px;
+    text-align: center;
+    min-height: 148px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .delete-modal__icon-wrap { margin-bottom: 14px; }
+  .delete-modal__icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: #fdeaea;
+    border: 1px solid #f5c2c2;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #a8071a;
+  }
+  .delete-modal__icon svg { width: 22px; height: 22px; }
+
+  .delete-modal__msg {
+    margin: 0;
+    font-size: 13.5px;
+    font-weight: 500;
+    color: #6b778c;
+    line-height: 1.6;
+  }
+  .delete-modal__msg strong {
+    display: block;
+    color: #16191f;
+    font-weight: 700;
+  }
+
+  /* Progress state */
+  .progress-ring-wrap { margin-bottom: 14px; }
+  .progress-ring {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    border: 3px solid #cde4ff;
+    border-top-color: #2684ff;
+    animation: spin 0.9s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .progress-label {
+    margin: 0 0 12px;
+    font-size: 13px;
+    font-weight: 600;
+    color: #0747a6;
+  }
+  .progress-track {
+    width: 100%;
+    height: 6px;
+    border-radius: 999px;
+    background: #e9f2ff;
+    overflow: hidden;
+  }
+  .progress-bar {
+    height: 100%;
+    width: 0%;
+    border-radius: 999px;
+    background: linear-gradient(90deg, #0052cc, #2684ff);
+    transition: width 0.15s linear;
+  }
+  .progress-percent {
+    margin-top: 8px;
+    font-size: 11.5px;
+    font-weight: 600;
+    color: #6b778c;
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* Success state */
+  .tick-wrap { margin-bottom: 14px; }
+  .tick-circle {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background: #e1f7ed;
+    border: 2px solid #35b37e;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #0d7a4a;
+    animation: pop 0.45s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+  .tick-circle svg { width: 28px; height: 28px; }
+  .tick-circle .tick-path { stroke-dasharray: 30; stroke-dashoffset: 30; animation: draw 0.35s 0.2s ease forwards; }
+  @keyframes pop { 0% { transform: scale(0.4); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
+  @keyframes draw { to { stroke-dashoffset: 0; } }
+
+  .success-title {
+    margin: 0 0 4px;
+    font-size: 15px;
+    font-weight: 700;
+    color: #0d7a4a;
+  }
+  .success-sub {
+    margin: 0;
+    font-size: 12.5px;
+    font-weight: 500;
+    color: #6b778c;
+  }
+  .success-sub strong { color: #16191f; font-weight: 700; }
+
+  .delete-modal__footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    padding: 12px 20px;
+    background: #fafafa;
+    border-top: 1px solid #e9ebeb;
+  }
+  .delete-modal__btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 6px 16px;
+    border-radius: 4px;
+    font-size: 12.5px;
+    font-weight: 600;
+    font-family: inherit;
+    border: 1px solid transparent;
+    cursor: pointer;
+    transition: background 0.15s ease, border-color 0.15s ease, transform 0.1s ease;
+  }
+  .delete-modal__btn--secondary { background: #ffffff; border-color: #879596; color: #16191f; }
+  .delete-modal__btn--secondary:hover { background: #f2f3f3; border-color: #aab7b8; }
+  .delete-modal__btn--delete { background: #d13212; border-color: #b92500; color: #ffffff; }
+  .delete-modal__btn--delete:hover { background: #b92500; }
+  .delete-modal__btn--done { background: #0d7a4a; border-color: #0d7a4a; color: #ffffff; }
+  .delete-modal__btn--done:hover { background: #0a5c38; }
+  .delete-modal__btn:active { transform: translateY(1px); }
+
+  .step { display: none; }
+  .step.is-active { display: flex; flex-direction: column; align-items: center; }
+</style>
+</head>
+<body>
+
+<div style="display:flex;flex-direction:column;align-items:center;">
+  <div class="combo-label">Delete Invoice — confirm → progress → success (click Delete)</div>
+  <div class="delete-modal" role="dialog" aria-modal="true" aria-label="Delete Invoice">
+    <div class="delete-modal__topbar delete-modal__topbar--confirm" id="topbar">
+      <span class="delete-modal__title" id="topbarTitle">Delete Invoice</span>
+      <button type="button" class="delete-modal__close" aria-label="Close">&times;</button>
+    </div>
+
+    <div class="delete-modal__body">
+      <!-- STEP 1: Confirm -->
+      <div class="step is-active" id="step-confirm">
+        <div class="delete-modal__icon-wrap">
+          <div class="delete-modal__icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="3 6 5 6 21 6" />
+              <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+            </svg>
+          </div>
+        </div>
+        <p class="delete-modal__msg">
+          Are you sure you want to delete invoice
+          <strong>PA-20260811-0001</strong>
+          This action cannot be undone.
+        </p>
+      </div>
+
+      <!-- STEP 2: Progress -->
+      <div class="step" id="step-progress">
+        <div class="progress-ring-wrap"><div class="progress-ring"></div></div>
+        <p class="progress-label">Deleting invoice…</p>
+        <div class="progress-track"><div class="progress-bar" id="progressBar"></div></div>
+        <div class="progress-percent" id="progressPercent">0%</div>
+      </div>
+
+      <!-- STEP 3: Success -->
+      <div class="step" id="step-success">
+        <div class="tick-wrap">
+          <div class="tick-circle">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round">
+              <polyline class="tick-path" points="20 6 9 17 4 12" />
+            </svg>
+          </div>
+        </div>
+        <h3 class="success-title">Invoice Deleted</h3>
+        <p class="success-sub">Invoice <strong>PA-20260811-0001</strong> was removed successfully.</p>
+      </div>
+    </div>
+
+    <div class="delete-modal__footer">
+      <button type="button" class="delete-modal__btn delete-modal__btn--secondary" id="btnCancel">Cancel</button>
+      <button type="button" class="delete-modal__btn delete-modal__btn--delete" id="btnDelete">Delete</button>
+      <button type="button" class="delete-modal__btn delete-modal__btn--done" id="btnDone" style="display:none;">Done</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  const topbar = document.getElementById('topbar');
+  const topbarTitle = document.getElementById('topbarTitle');
+  const stepConfirm = document.getElementById('step-confirm');
+  const stepProgress = document.getElementById('step-progress');
+  const stepSuccess = document.getElementById('step-success');
+  const progressBar = document.getElementById('progressBar');
+  const progressPercent = document.getElementById('progressPercent');
+  const btnCancel = document.getElementById('btnCancel');
+  const btnDelete = document.getElementById('btnDelete');
+  const btnDone = document.getElementById('btnDone');
+
+  let timer;
+
+  function showStep(step) {
+    stepConfirm.classList.remove('is-active');
+    stepProgress.classList.remove('is-active');
+    stepSuccess.classList.remove('is-active');
+    step.classList.add('is-active');
+  }
+
+  function reset() {
+    clearInterval(timer);
+    showStep(stepConfirm);
+    topbar.className = 'delete-modal__topbar delete-modal__topbar--confirm';
+    topbarTitle.textContent = 'Delete Invoice';
+    btnDelete.style.display = '';
+    btnCancel.style.display = '';
+    btnDone.style.display = 'none';
+    progressBar.style.width = '0%';
+    progressPercent.textContent = '0%';
+  }
+
+  btnDelete.addEventListener('click', () => {
+    showStep(stepProgress);
+    topbar.className = 'delete-modal__topbar delete-modal__topbar--progress';
+    topbarTitle.textContent = 'Deleting Invoice';
+    btnDelete.disabled = true;
+    btnCancel.disabled = true;
+
+    let pct = 0;
+    timer = setInterval(() => {
+      pct = Math.min(100, pct + Math.ceil(Math.random() * 9));
+      progressBar.style.width = pct + '%';
+      progressPercent.textContent = pct + '%';
+      if (pct >= 100) {
+        clearInterval(timer);
+        setTimeout(() => {
+          topbar.className = 'delete-modal__topbar delete-modal__topbar--success';
+          topbarTitle.textContent = 'Invoice Deleted';
+          showStep(stepSuccess);
+          btnDelete.style.display = 'none';
+          btnCancel.style.display = 'none';
+          btnDone.style.display = '';
+        }, 300);
+      }
+    }, 120);
+  });
+
+  btnDone.addEventListener('click', reset);
+  btnCancel.addEventListener('click', reset);
+  document.querySelector('.delete-modal__close').addEventListener('click', reset);
+</script>
+
+</body>
+</html>
