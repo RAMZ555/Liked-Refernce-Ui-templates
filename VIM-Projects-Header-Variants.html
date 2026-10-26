@@ -1,0 +1,225 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>VIM Projects - Header Variants Reference</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    padding: 40px 24px 64px;
+    background: #f4f6fa;
+    color: #313d52;
+    font-family: Inter, system-ui, -apple-system, "Segoe UI", sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+  .wrap { max-width: 1180px; margin: 0 auto; }
+  .doc-title { margin: 0 0 6px; font-size: 22px; font-weight: 800; letter-spacing: -0.02em; color: #16233f; }
+  .doc-sub { margin: 0 0 32px; font-size: 13px; color: #6b7688; }
+  .variant { margin-bottom: 40px; }
+  .variant-label { display: flex; align-items: center; gap: 10px; margin: 0 0 10px; }
+  .variant-label h2 { margin: 0; font-size: 14px; font-weight: 800; color: #16233f; }
+  .tag { display: inline-flex; align-items: center; height: 20px; padding: 0 8px; background: #e9eff8; color: #1c4a8c; font-size: 10px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; }
+  .tag.alt { background: #eef1ff; color: #4456d6; }
+  .variant-note { margin: 0 0 10px; font-size: 12px; color: #6b7688; }
+
+  .card {
+    position: relative;
+    overflow: hidden;
+    border: 1px solid #c7d6ee;
+    padding: 16px 20px;
+  }
+  .glow { position: absolute; border-radius: 9999px; filter: blur(48px); pointer-events: none; }
+
+  /* ---------- Option 2: frosted light ---------- */
+  .opt2 {
+    background: linear-gradient(118deg, #ffffff 0%, #f2f6fd 55%, #e5edfa 100%);
+    color: #16233f;
+    box-shadow: 0 14px 34px -24px rgba(16, 28, 58, 0.35);
+  }
+  .opt2 .rail {
+    position: absolute;
+    left: 0; top: 0; bottom: 0; width: 3px;
+    background: linear-gradient(180deg, #1d8a4c, #b07a1f, #e11d48);
+  }
+  .opt2 .glow-a { right: -64px; top: -80px; width: 224px; height: 224px; background: rgba(105, 167, 255, 0.2); }
+  .opt2 .glow-b { bottom: -96px; left: 33%; width: 192px; height: 192px; background: rgba(225, 29, 72, 0.1); }
+
+  /* ---------- Option 3: navy to indigo/rose ---------- */
+  .opt3 {
+    background: linear-gradient(105deg, #101c38 0%, #1c3156 52%, #3a2f78 76%, #8a2c58 100%);
+    color: #ffffff;
+    box-shadow: 0 14px 34px -18px rgba(16, 28, 58, 0.55);
+  }
+  .opt3 .glow-a { right: -64px; top: -80px; width: 224px; height: 224px; background: rgba(225, 29, 72, 0.25); }
+  .opt3 .glow-b { bottom: -96px; left: 33%; width: 192px; height: 192px; background: rgba(79, 109, 245, 0.2); }
+
+  /* ---------- shared header layout ---------- */
+  .head {
+    position: relative;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px;
+  }
+  .opt2 .head { padding-left: 8px; }
+  .brand { display: flex; align-items: flex-start; gap: 12px; min-width: 0; }
+  .icon {
+    width: 44px; height: 44px; flex: none;
+    display: grid; place-items: center;
+  }
+  .opt2 .icon {
+    background: #1c4a8c;
+    color: #fff;
+    box-shadow: 0 1px 2px rgba(16, 28, 58, 0.18);
+  }
+  .opt3 .icon {
+    background: rgba(255, 255, 255, 0.1);
+    color: #fff;
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.2);
+  }
+  .kicker {
+    display: inline-flex; align-items: center; gap: 6px;
+    font-size: 10px; font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase;
+  }
+  .opt2 .kicker { background: #e9eff8; color: #1c4a8c; padding: 2px 8px; letter-spacing: 0.16em; }
+  .opt3 .kicker { color: #b9c7ff; letter-spacing: 0.18em; }
+  .kicker .dot { width: 4px; height: 4px; border-radius: 9999px; background: #1d8a4c; }
+  .opt3 .kicker .dot { display: none; }
+  .title { margin: 4px 0 0; font-size: 21px; font-weight: 800; letter-spacing: -0.025em; color: #16233f; }
+  .opt3 .title { color: #fff; }
+  .lede { margin: 4px 0 0; max-width: 680px; font-size: 12px; line-height: 1.6; color: #6b7688; }
+  .opt3 .lede { color: #d3d9f0; }
+
+  .actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+  .btn {
+    display: inline-flex; align-items: center; height: 32px; gap: 6px;
+    padding: 0 12px; font-size: 12px; font-weight: 600;
+    border: 1px solid #e4e7ee; background: #fff; color: #16233f;
+  }
+  .btn svg { width: 14px; height: 14px; }
+  .btn-primary { padding: 0 14px; font-weight: 700; background: #1c4a8c; border-color: #1c4a8c; color: #fff; }
+  .opt3 .btn { background: rgba(255, 255, 255, 0.1); border-color: rgba(255, 255, 255, 0.25); color: #fff; }
+  .opt3 .btn-primary { background: #fff; border-color: #fff; color: #1c4a8c; }
+
+  .stats {
+    position: relative;
+    margin-top: 16px;
+    padding: 12px 0 0;
+    border-top: 1px solid #e4e7ee;
+    display: flex; flex-wrap: wrap; align-items: center; gap: 8px 20px;
+    font-size: 11px; color: #6b7688;
+  }
+  .opt2 .stats { padding-left: 8px; }
+  .opt3 .stats { border-top-color: rgba(255, 255, 255, 0.15); color: #c3cdea; }
+  .stats b { color: #16233f; }
+  .opt3 .stats b { color: #fff; }
+  .pill-green {
+    margin-left: auto;
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 4px 8px;
+    border: 1px solid #cdead9; background: #f1f9f4; color: #1d8a4c;
+  }
+  .opt3 .pill-green { margin-left: auto; padding: 0; border: 0; background: transparent; color: inherit; }
+  .pill-green .dot { width: 6px; height: 6px; border-radius: 9999px; background: #4ade80; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1 class="doc-title">VIM Projects &mdash; Header Variants</h1>
+  <p class="doc-sub">
+    Reference captured from the live Projects page. Use either variant for future screens. Option 2 is the applied one;
+    Option 3 is kept as an alternate.
+  </p>
+
+  <section class="variant">
+    <div class="variant-label">
+      <h2>Option 2 &mdash; Frosted light</h2>
+      <span class="tag">Applied</span>
+    </div>
+    <p class="variant-note">White-to-mist-blue gradient, navy text, gradient left rail, white Refresh and navy primary action.</p>
+
+    <div class="card opt2">
+      <span class="rail"></span>
+      <div class="glow glow-a"></div>
+      <div class="glow glow-b"></div>
+
+      <div class="head">
+        <div class="brand">
+          <span class="icon">
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 7V4a1 1 0 0 0-1-1H5a2 2 0 0 0 0 4h15a1 1 0 0 1 1 1v4h-3a2 2 0 0 0 0 4h3a1 1 0 0 0 1-1v-2a1 1 0 0 0-1-1"/><path d="M3 5v14a2 2 0 0 0 2 2h15a1 1 0 0 0 1-1v-4"/></svg>
+          </span>
+          <div>
+            <div class="kicker"><span class="dot"></span>Portfolio control</div>
+            <h2 class="title">Projects</h2>
+            <p class="lede">Customer money in, vendor money out, per release. Every invoice, milestone and payment stays tied to its project.</p>
+          </div>
+        </div>
+        <div class="actions">
+          <button class="btn" type="button">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M8 16H3v5"/></svg>
+            Refresh
+          </button>
+          <button class="btn btn-primary" type="button">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
+            New project
+          </button>
+        </div>
+      </div>
+
+      <div class="stats">
+        <span><b>1</b> visible</span>
+        <span><b>1</b> active</span>
+        <span><b>1</b> currency</span>
+        <span><b>0</b> overdue milestones</span>
+      </div>
+    </div>
+  </section>
+
+  <section class="variant">
+    <div class="variant-label">
+      <h2>Option 3 &mdash; Navy to indigo / rose</h2>
+      <span class="tag alt">Alternate</span>
+    </div>
+    <p class="variant-note">Deep navy flowing into indigo and rose, white text, white stat strip and white primary action.</p>
+
+    <div class="card opt3">
+      <div class="glow glow-a"></div>
+      <div class="glow glow-b"></div>
+
+      <div class="head">
+        <div class="brand">
+          <span class="icon">
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 7V4a1 1 0 0 0-1-1H5a2 2 0 0 0 0 4h15a1 1 0 0 1 1 1v4h-3a2 2 0 0 0 0 4h3a1 1 0 0 0 1-1v-2a1 1 0 0 0-1-1"/><path d="M3 5v14a2 2 0 0 0 2 2h15a1 1 0 0 0 1-1v-4"/></svg>
+          </span>
+          <div>
+            <div class="kicker"><span class="dot"></span>Portfolio control</div>
+            <h2 class="title">Projects</h2>
+            <p class="lede">Customer money in, vendor money out, per release. Every invoice, milestone and payment stays tied to its project.</p>
+          </div>
+        </div>
+        <div class="actions">
+          <button class="btn" type="button">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M8 16H3v5"/></svg>
+            Refresh
+          </button>
+          <button class="btn btn-primary" type="button">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
+            New project
+          </button>
+        </div>
+      </div>
+
+      <div class="stats">
+        <span><b>1</b> visible</span>
+        <span><b>1</b> active</span>
+        <span><b>1</b> currency</span>
+        <span><b>0</b> overdue milestones</span>
+      </div>
+    </div>
+  </section>
+</div>
+</body>
+</html>
