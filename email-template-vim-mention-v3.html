@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>VIM — You were mentioned • Email v3 (emerald)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --ink: #10241c;
+    --text: #31493d;
+    --muted: #52705f;
+    --faint: #7c9486;
+    --line: #dfe8e2;
+    --deep: #0b3a27;
+    --deep-2: #11603c;
+    --mid: #159a5e;
+    --accent: #14935b;
+    --accent-soft: #ecf7f0;
+    --accent-line: #cfe9da;
+    --gold: #e8a33d;
+    --on-gradient: #ffffff;
+    --muted-on-gradient: rgba(255,255,255,0.74);
+    --bg: #eff3f0;
+  }
+
+  body {
+    font-family: 'Inter', -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+    background: radial-gradient(1200px 500px at 50% -100px, #dcf2e6 0%, var(--bg) 60%);
+    min-height: 100vh;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    padding: 40px 20px;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .mail {
+    width: 100%;
+    max-width: 600px;
+    background: #fff;
+    border-radius: 18px;
+    overflow: hidden;
+    box-shadow: 0 1px 2px rgba(11,58,39,0.04), 0 24px 60px -24px rgba(11,58,39,0.30);
+    border: 1px solid var(--line);
+  }
+
+  /* ── Top bar: brand + trust chip ── */
+  .mail__bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    padding: 16px 26px;
+    background: #fff;
+  }
+
+  .mail__brand { display: flex; align-items: center; gap: 11px; min-width: 0; }
+
+  .mail__mark {
+    flex: 0 0 auto; width: 34px; height: 34px; border-radius: 10px;
+    background: linear-gradient(135deg, var(--deep) 0%, var(--deep-2) 100%);
+    color: #fff; font-size: 12px; font-weight: 800; letter-spacing: 0.04em;
+    display: flex; align-items: center; justify-content: center;
+  }
+
+  .mail__brand-text { font-size: 13px; font-weight: 700; color: var(--ink); white-space: nowrap; }
+
+  .mail__brand-sub { font-size: 10.5px; color: var(--faint); font-weight: 600; letter-spacing: 0.03em; }
+
+  .mail__trust {
+    display: inline-flex; align-items: center; gap: 7px;
+    padding: 6px 12px; border-radius: 999px;
+    background: var(--accent-soft); border: 1px solid var(--accent-line);
+    font-size: 11px; font-weight: 700; color: #0d5c36; white-space: nowrap;
+  }
+
+  .mail__trust-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); }
+
+  /* ── Hero ── */
+  .mail__hero {
+    background: linear-gradient(120deg, var(--deep) 0%, var(--deep-2) 55%, var(--mid) 100%);
+    padding: 34px 30px 30px;
+    color: var(--on-gradient);
+  }
+
+  .mail__hero-top { display: flex; align-items: center; justify-content: space-between; gap: 14px; margin-bottom: 18px; }
+
+  .mail__hero-event {
+    display: inline-flex; align-items: center; gap: 7px;
+    padding: 5px 12px; border-radius: 999px;
+    background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.22);
+    font-size: 11px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--on-gradient);
+  }
+
+  .mail__hero-when { font-size: 12px; color: var(--muted-on-gradient); font-weight: 600; }
+
+  .mail__hero h1 {
+    font-size: 27px;
+    font-weight: 800;
+    letter-spacing: -0.025em;
+    color: var(--on-gradient);
+    line-height: 1.25;
+    margin-bottom: 12px;
+  }
+
+  .mail__hero h1 em { font-style: normal; color: var(--gold); }
+
+  .mail__hero p { font-size: 13.5px; color: var(--muted-on-gradient); line-height: 1.6; max-width: 44ch; }
+
+  /* ── Body ── */
+  .mail__body { padding: 24px 26px 8px; }
+
+  /* info tiles */
+  .tiles { display: flex; gap: 12px; margin-bottom: 22px; }
+
+  .tile {
+    flex: 1; min-width: 0;
+    background: var(--accent-soft); border: 1px solid var(--accent-line);
+    border-radius: 12px; padding: 12px 14px;
+  }
+
+  .tile__label { font-size: 9.5px; font-weight: 700; color: var(--accent); text-transform: uppercase; letter-spacing: 0.07em; margin-bottom: 5px; }
+
+  .tile__value {
+    font-size: 13.5px; font-weight: 700; color: var(--ink);
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+
+  .tile__value--mono { font-family: ui-monospace, "SF Mono", Menlo, monospace; font-size: 13px; }
+
+  /* mention bubble */
+  .bubble {
+    position: relative;
+    background: #fff;
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    padding: 15px 16px 13px;
+    margin-bottom: 22px;
+    box-shadow: 0 2px 8px -2px rgba(11,58,39,0.06);
+  }
+
+  .bubble::before {
+    content: "";
+    position: absolute; left: -1px; top: 16px; bottom: 16px; width: 3px;
+    border-radius: 0 3px 3px 0; background: linear-gradient(var(--accent), var(--deep));
+  }
+
+  .bubble__who { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+
+  .bubble__avatar {
+    flex: 0 0 auto; width: 32px; height: 32px; border-radius: 50%;
+    background: linear-gradient(135deg, #128a52, #0b3a27);
+    color: #fff; font-size: 11.5px; font-weight: 700;
+    display: flex; align-items: center; justify-content: center;
+  }
+
+  .bubble__name { font-size: 13px; font-weight: 700; color: var(--ink); }
+
+  .bubble__time { font-size: 11px; color: var(--faint); font-weight: 600; margin-top: 1px; }
+
+  .bubble__text { font-size: 13.5px; color: var(--text); line-height: 1.65; }
+
+  .bubble__text .chip {
+    display: inline-block; background: var(--accent-soft); color: var(--accent);
+    border: 1px solid var(--accent-line); border-radius: 999px;
+    font-size: 12px; font-weight: 700; padding: 0 8px; margin-right: 2px;
+  }
+
+  .bubble__tag {
+    display: inline-flex; align-items: center; gap: 6px;
+    margin-top: 12px; font-size: 11px; font-weight: 600; color: var(--muted);
+  }
+
+  .bubble__tag-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--gold); }
+
+  /* cta */
+  .cta { margin-bottom: 18px; }
+
+  .cta__btn {
+    display: flex; align-items: center; justify-content: center; gap: 10px;
+    width: 100%;
+    background: var(--deep); border: 1px solid var(--deep-2); color: #fff;
+    font-family: inherit; font-size: 14.5px; font-weight: 700;
+    padding: 14px 20px; border-radius: 12px; text-decoration: none;
+    transition: background 0.15s ease;
+  }
+
+  .cta__btn:hover { background: var(--deep-2); }
+
+  .cta__btn svg { flex: 0 0 auto; }
+
+  .cta__hint { text-align: center; font-size: 11px; color: var(--faint); margin-top: 8px; }
+
+  /* secure note */
+  .secure {
+    display: flex; gap: 10px; align-items: flex-start;
+    background: var(--accent-soft); border: 1px solid var(--accent-line);
+    border-radius: 10px; padding: 12px 14px; margin-bottom: 4px;
+  }
+
+  .secure p { font-size: 12px; color: #14532d; line-height: 1.55; }
+
+  .secure b { font-weight: 700; }
+
+  /* ── Footer ── */
+  .mail__footer {
+    display: flex; align-items: center; justify-content: space-between; gap: 12px;
+    padding: 18px 26px 22px;
+    border-top: 1px solid var(--line);
+  }
+
+  .mail__footer p { font-size: 11px; color: var(--faint); line-height: 1.6; }
+
+  .mail__footer-brand { font-size: 10.5px; font-weight: 700; color: var(--deep); letter-spacing: 0.06em; text-transform: uppercase; white-space: nowrap; }
+
+  @media (max-width: 520px) {
+    .tiles { flex-direction: column; }
+    .mail__hero { padding: 26px 22px 24px; }
+    .mail__body { padding: 20px 18px 6px; }
+    .mail__bar, .mail__footer { padding-left: 18px; padding-right: 18px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="mail">
+
+  <!-- Top bar: brand + trust chip -->
+  <div class="mail__bar">
+    <div class="mail__brand">
+      <div class="mail__mark">VIM</div>
+      <div>
+        <div class="mail__brand-text">Vendor Invoice Management</div>
+        <div class="mail__brand-sub">LG CNS · Accounts payable workspace</div>
+      </div>
+    </div>
+    <span class="mail__trust"><span class="mail__trust-dot"></span>Private · Encrypted</span>
+  </div>
+
+  <!-- Hero -->
+  <div class="mail__hero">
+    <div class="mail__hero-top">
+      <span class="mail__hero-event">New mention</span>
+      <span class="mail__hero-when">Today · 2:14 pm SGT</span>
+    </div>
+    <h1>Elena, you’ve been <em>@mentioned</em> in an invoice case.</h1>
+    <p>Priya added you to the conversation and is waiting on your review. Opening the case gives you read access — nothing more.</p>
+  </div>
+
+  <!-- Body -->
+  <div class="mail__body">
+
+    <!-- Info tiles -->
+    <div class="tiles">
+      <div class="tile">
+        <div class="tile__label">Case</div>
+        <div class="tile__value tile__value--mono">7F3A-2C1B</div>
+      </div>
+      <div class="tile">
+        <div class="tile__label">Vendor</div>
+        <div class="tile__value">Northwind Logistics Pte Ltd</div>
+      </div>
+      <div class="tile">
+        <div class="tile__label">Invoice</div>
+        <div class="tile__value tile__value--mono">INV-24817</div>
+      </div>
+    </div>
+
+    <!-- Mention bubble -->
+    <div class="bubble">
+      <div class="bubble__who">
+        <div class="bubble__avatar">PN</div>
+        <div>
+          <div class="bubble__name">Priya Nair</div>
+          <div class="bubble__time">Mentioned you at 2:14 pm</div>
+        </div>
+      </div>
+      <p class="bubble__text">
+        <span class="chip">@Elena Yeo</span>
+        the GST line is corrected in version 3. Could you review before the payment run tomorrow?
+      </p>
+      <span class="bubble__tag"><span class="bubble__tag-dot"></span>You were added to this case as a participant</span>
+    </div>
+
+    <!-- CTA -->
+    <div class="cta">
+      <a class="cta__btn" href="#">
+        Open case
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+      </a>
+      <p class="cta__hint">Sign in with your LG CNS account to open the case</p>
+    </div>
+
+    <!-- Secure note -->
+    <div class="secure">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#14935b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex:0 0 auto;margin-top:1px"><path d="M12 3 4 6v6c0 5 3.5 8 8 9 4.5-1 8-4 8-9V6z"/><path d="m9 12 2 2 4-4"/></svg>
+      <p><b>Why did I get this?</b> You were mentioned with <b>@</b> in a case message. Cases are encrypted at rest, viewable only by participants, and every view is watermarked in the audit trail.</p>
+    </div>
+
+  </div>
+
+  <!-- Footer -->
+  <div class="mail__footer">
+    <p>You received this because someone @mentioned you in a vendor invoice case.<br>Don’t see a case you expected? Reply to the sender on the platform.</p>
+    <span class="mail__footer-brand">LG CNS · VIM</span>
+  </div>
+
+</div>
+
+</body>
+</html>
